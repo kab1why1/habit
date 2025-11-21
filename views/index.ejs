@@ -1,0 +1,42 @@
+<main class="container">
+    <section class="stats-grid">
+        <div class="card">
+            <h3>Total Habits</h3>
+            <p class="value">0</p>
+        </div>
+        <div class="card">
+            <h3>Today's Progress</h3>
+            <p class="value">0/0</p>
+        </div>
+        <div class="card">
+            <h3>Best Streak</h3>
+            <p class="value">0 days</p>
+        </div>
+        <div class="card">
+            <h3>Total Completions</h3>
+            <p class="value">1</p>
+        </div>
+    </section>
+
+    <section class="week">
+        <h2>This Week</h2>
+        <div class="week-days">
+            <% const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']; %>
+            <% const dates = [17,18,19,20,21,22,23]; %>
+            <% for(let i=0;i<7;i++){ %>
+            <div class="day <%= i === 4 ? 'active' : '' %>">
+                <strong><%= days[i] %></strong><br>
+                <span class="date"><%= dates[i] %></span><br>
+                <span class="small">0/0</span>
+            </div>
+            <% } %>
+        </div>
+    </section>
+
+    <section class="today-habits">
+        <div class="empty-icon">🎯</div>
+        <h3>No habits yet</h3>
+        <p>Create your first habit to start your journey</p>
+        <a href="#" class="create-btn">+ Create Your First Habit</a>
+    </section>
+</main>
