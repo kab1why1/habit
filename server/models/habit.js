@@ -1,7 +1,7 @@
 const { query } = require('../config/db');
 
 // Create table
-async function createHabitTable() {
+async function createHabitsTable() {
   const sql = `
     CREATE TABLE IF NOT EXISTS habits (
       id SERIAL PRIMARY KEY,
@@ -13,7 +13,7 @@ async function createHabitTable() {
   return query(sql);
 }
 
-// Insert habit
+// Insert Habit
 async function createHabit({ title, description }) {
   const sql = `
     INSERT INTO habits (title, description)
@@ -27,13 +27,21 @@ async function createHabit({ title, description }) {
 
 // Get all habits
 async function getAllHabits() {
-  const sql = `SELECT * FROM habits ORDER BY id DESC`;
+  const sql = "SELECT * FROM habits ORDER BY id DESC";
   const result = await query(sql);
   return result.rows;
 }
 
+// Get one habit
+async function getHabitById(id) {
+  const sql = "SELECT * FROM habits WHERE id = $1";
+  const result = await query(sql, [id]);
+  return result.rows[0];
+}
+
 module.exports = {
-  createHabitTable,
+  createHabitsTable,
   createHabit,
-  getAllHabits
+  getAllHabits,
+  getHabitById
 };

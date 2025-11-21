@@ -1,43 +1,41 @@
 const express = require('express');
 const router = express.Router();
 
-const { createHabit, getAllHabits } = require('../models/habit');
+const {
+  createHabit,
+  getAllHabits,
+  getHabitById
+} = require('../models/habit');
 
-// TEMPORARY DEBUG FUNCTION
-async function insertHabitData() {
-    try {
-        await createHabit({
-            title: "Drink Water",
-            description: "Drink 8 cups daily"
-        });
+// TEMP insert test habit once
+// createHabit({ title: "Drink Water", description: "8 cups a day" });
 
-        await createHabit({
-            title: "Study Programming",
-            description: "At least 2 hours"
-        });
-
-        console.log("Sample habits inserted!");
-    } catch (err) {
-        console.error("Error inserting habit:", err);
-    }
-}
-
-// Run ONCE manually if needed
-// insertHabitData();
-
-// Main route
+// Home — show all habits
 router.get('/', async (req, res) => {
     const habits = await getAllHabits();
 
     const locals = {
         title: "HabitFlow",
-        description: "Just an app to track your habits",
+        description: "Track your habits",
         habits
     };
 
     res.render('index', { locals });
 });
 
+// Single habit page
+router.get('/habit/:id', async (req, res) => {
+    const id = req.params.id;
+    const habit = await getHabitById(id);
+
+    if (!habit) {
+        return res.status(404).send("Habit not found");
+    }
+
+    res.render('habit', { habit });
+});
+
+// About page
 router.get('/about', (req, res) => {
     res.render('about');
 });
