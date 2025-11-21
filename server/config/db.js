@@ -12,13 +12,11 @@ const pool = new Pool({
   connectionTimeoutMillis: 2000,
 });
 
-// Optional helper to run queries with automatic error handling
 async function query(text, params) {
   const start = Date.now();
   try {
     const res = await pool.query(text, params);
     const duration = Date.now() - start;
-    // console.log('executed query', { text, duration, rows: res.rowCount });
     return res;
   } catch (err) {
     console.error('DB Query Error', err);
@@ -26,7 +24,6 @@ async function query(text, params) {
   }
 }
 
-// function to test DB connectivity (call before starting the app)
 async function testConnection() {
   try {
     const client = await pool.connect();
