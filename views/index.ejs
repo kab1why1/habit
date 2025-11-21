@@ -1,7 +1,6 @@
 <div class="container">
     <main>
 
-        <!-- Stats -->
         <section class="stats-grid">
             <div class="card">
                 <h3>Total Habits</h3>
@@ -9,7 +8,7 @@
             </div>
             <div class="card">
                 <h3>Today's Progress</h3>
-                <p class="value">0/<%= locals.habits.length %></p>
+                <p class="value">0/0</p>
             </div>
             <div class="card">
                 <h3>Best Streak</h3>
@@ -21,28 +20,34 @@
             </div>
         </section>
 
-        <!-- Habits List -->
         <section class="week">
             <h2>Your Habits</h2>
 
             <% if (locals.habits.length === 0) { %>
-                <p style="color:#777; padding: 20px;">No habits yet. Add one.</p>
+                <p>No habits yet. Add one!</p>
+            <% } else { %>
+
+                <div class="week-days" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+
+                    <% locals.habits.forEach(habit => { %>
+                        <a href="/habit/<%= habit.id %>" class="day" style="text-decoration:none;">
+                            <strong><%= habit.title %></strong>
+                            <span class="date"><%= habit.id %></span>
+                            <span class="small"><%= habit.description %></span>
+                        </a>
+                    <% }) %>
+
+                </div>
+
             <% } %>
 
-            <% locals.habits.forEach(habit => { %>
-                <div class="card" style="margin-bottom: 10px;">
-                    <h3><%= habit.title %></h3>
-                    <p style="color: #999;"><%= habit.description %></p>
-                </div>
-            <% }); %>
         </section>
 
-        <!-- Today message -->
         <section class="today-habits">
-            <div class="empty-icon">🎯</div>
-            <h3>You're doing great!</h3>
-            <p>Create or continue your habits.</p>
-            <a href="#" class="create-btn">+ Create Habit</a>
+            <div class="empty-icon">✨</div>
+            <h3>Create a new habit</h3>
+            <p>Your future self will thank you</p>
+            <a href="#" class="create-btn">+ Add Habit</a>
         </section>
 
     </main>
