@@ -1,13 +1,15 @@
 <div class="container">
     <main>
+
+        <!-- Stats -->
         <section class="stats-grid">
             <div class="card">
                 <h3>Total Habits</h3>
-                <p class="value">0</p>
+                <p class="value"><%= locals.habits.length %></p>
             </div>
             <div class="card">
                 <h3>Today's Progress</h3>
-                <p class="value">0/0</p>
+                <p class="value">0/<%= locals.habits.length %></p>
             </div>
             <div class="card">
                 <h3>Best Streak</h3>
@@ -15,54 +17,33 @@
             </div>
             <div class="card">
                 <h3>Total Completions</h3>
-                <p class="value">1</p>
+                <p class="value">0</p>
             </div>
         </section>
+
+        <!-- Habits List -->
         <section class="week">
-            <h2>This Week</h2>
-            <div class="week-days">
-                <div class="day">
-                    <strong>Mon</strong>
-                    <span class="date">17</span>
-                    <span class="small">0/0</span>
+            <h2>Your Habits</h2>
+
+            <% if (locals.habits.length === 0) { %>
+                <p style="color:#777; padding: 20px;">No habits yet. Add one.</p>
+            <% } %>
+
+            <% locals.habits.forEach(habit => { %>
+                <div class="card" style="margin-bottom: 10px;">
+                    <h3><%= habit.title %></h3>
+                    <p style="color: #999;"><%= habit.description %></p>
                 </div>
-                <div class="day">
-                    <strong>Tue</strong>
-                    <span class="date">18</span>
-                    <span class="small">0/0</span>
-                </div>
-                <div class="day">
-                    <strong>Wed</strong>
-                    <span class="date">19</span>
-                    <span class="small">0/0</span>
-                </div>
-                <div class="day">
-                    <strong>Thu</strong>
-                    <span class="date">20</span>
-                    <span class="small">0/0</span>
-                </div>
-                <div class="day active">
-                    <strong>Fri</strong>
-                    <span class="date">21</span>
-                    <span class="small">0/0</span>
-                </div>
-                <div class="day">
-                    <strong>Sat</strong>
-                    <span class="date">22</span>
-                    <span class="small">0/0</span>
-                </div>
-                <div class="day">
-                    <strong>Sun</strong>
-                    <span class="date">23</span>
-                    <span class="small">0/0</span>
-                </div>
-            </div>
+            <% }); %>
         </section>
+
+        <!-- Today message -->
         <section class="today-habits">
             <div class="empty-icon">🎯</div>
-            <h3>No habits yet</h3>
-            <p>Create your first habit to start your journey</p>
-            <a href="#" class="create-btn">+ Create Your First Habit</a>
+            <h3>You're doing great!</h3>
+            <p>Create or continue your habits.</p>
+            <a href="#" class="create-btn">+ Create Habit</a>
         </section>
-    </main> 
+
+    </main>
 </div>
