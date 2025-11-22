@@ -1,0 +1,12 @@
+<main>
+  <div class="card">
+    <h2><%= locals.habit.title %></h2>
+    <p class="small">Created: <%= new Date(locals.habit.created_at).toLocaleString() %></p>
+    <p style="margin-top:12px;"><%= locals.habit.description %></p>
+
+    <div style="margin-top:14px;">
+      <a href="/habits/<%= locals.habit.id %>/edit" class="btn">Edit</a>
+      <a href="/habits" class="btn">Back</a>
+    </div>
+  </div>
+</main>

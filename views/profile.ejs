@@ -1,0 +1,11 @@
+<main>
+  <h2>Your profile</h2>
+  <% if (locals.error) { %><p style="color:red"><%= locals.error %></p><% } %>
+  <form action="/profile" method="POST">
+    <label>Username</label>
+    <input name="username" value="<%= locals.user.username %>" required>
+    <label>New password (leave empty to keep)</label>
+    <input name="password" type="password">
+    <button type="submit" class="btn btn-primary">Save</button>
+  </form>
+</main>

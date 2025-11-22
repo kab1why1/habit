@@ -1,0 +1,22 @@
+<main>
+  <h2>Your Habits</h2>
+
+  <% if (!locals.habits || locals.habits.length === 0) { %>
+    <p>You don't have any habits yet. <a href="/habits/new">Create one</a>.</p>
+  <% } else { %>
+    <div class="habit-grid">
+      <% locals.habits.forEach(h => { %>
+        <div class="card">
+          <h3><a href="/habits/<%= h.id %>"><%= h.title %></a></h3>
+          <p><%= h.description ? h.description.slice(0, 200) : '' %></p>
+          <div style="margin-top:10px;">
+            <a href="/habits/<%= h.id %>/edit" class="btn btn-small">Edit</a>
+            <form action="/habits/<%= h.id %>/delete" method="POST" style="display:inline;">
+              <button type="submit" class="btn btn-danger btn-small" onclick="return confirm('Delete this habit?')">Delete</button>
+            </form>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</main>
