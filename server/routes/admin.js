@@ -1,3 +1,4 @@
+// server/routes/admin.js
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
@@ -5,69 +6,72 @@ const bcrypt = require('bcrypt');
 const { createUser, findByUsername, createUsersTable } = require('../models/user');
 const { createPostTable } = require('../models/post');
 
-// Create tables on server start
+// Ensure tables exist at module load
 (async () => {
-  await createUsersTable();
-  await createPostTable();
+  try {
+    await createUsersTable();
+    await createPostTable();
+  } catch (err) {
+    console.error('Error creating admin-related tables', err);
+  }
 })();
 
-// Admin login page
+// Admin login page (GET)
 router.get('/', (req, res) => {
-  res.render('admin/index', { layout: '../layouts/admin', error: null });
+  res.render('admin/index', { layout: 'layouts/admin', error: null, user: req.session?.user || null });
 });
 
-// Admin register (optional)
+// Admin register page (GET) — optional; will create regular user
 router.get('/register', (req, res) => {
-  res.render('admin/register', { layout: '../layouts/admin', error: null });
+  res.render('admin/register', { layout: 'layouts/admin', error: null, user: req.session?.user || null });
 });
 
-// POST login
+// POST /admin/login
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
   try {
     const user = await findByUsername(username);
-    if (!user) return res.render('admin/index', { layout: '../layouts/admin', error: 'Invalid credentials' });
+    if (!user) return res.render('admin/index', { layout: 'layouts/admin', error: 'Invalid credentials', user: null });
 
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.render('admin/index', { layout: '../layouts/admin', error: 'Invalid credentials' });
+    if (!match) return res.render('admin/index', { layout: 'layouts/admin', error: 'Invalid credentials', user: null });
 
-    if (!user.is_admin) return res.render('admin/index', { layout: '../layouts/admin', error: 'Not an admin' });
+    if (!user.is_admin) return res.render('admin/index', { layout: 'layouts/admin', error: 'Not an admin', user: null });
 
     req.session.user = user;
-    res.redirect('/admin/dashboard');
+    return res.redirect('/admin/dashboard');
   } catch (err) {
     console.error(err);
-    res.render('admin/index', { layout: '../layouts/admin', error: 'Something went wrong' });
+    return res.render('admin/index', { layout: 'layouts/admin', error: 'Something went wrong', user: null });
   }
 });
 
-// POST register (normal users)
+// POST /admin/register (creates normal user)
 router.post('/register', async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, password } = req.body;
   try {
     const existing = await findByUsername(username);
-    if (existing) return res.render('admin/register', { layout: '../layouts/admin', error: 'Username already exists' });
+    if (existing) return res.render('admin/register', { layout: 'layouts/admin', error: 'Username already exists', user: null });
 
-    const user = await createUser({ username, email, password, is_admin: false });
-    res.redirect('/login');
+    // by default admin route register makes normal user
+    await createUser({ username, password, is_admin: false });
+    return res.redirect('/admin'); // to admin login or wherever appropriate
   } catch (err) {
     console.error(err);
-    res.render('admin/register', { layout: '../layouts/admin', error: 'Something went wrong' });
+    return res.render('admin/register', { layout: 'layouts/admin', error: 'Something went wrong', user: null });
   }
 });
 
-// Admin dashboard
+// Dashboard
 router.get('/dashboard', (req, res) => {
   if (!req.session.user || !req.session.user.is_admin) return res.redirect('/admin');
 
-  res.render('admin/dashboard', { layout: '../layouts/admin', user: req.session.user });
+  res.render('admin/dashboard', { layout: 'layouts/admin', user: req.session.user });
 });
 
-// Logout
+// Logout from admin
 router.get('/logout', (req, res) => {
-  req.session.destroy(() => {
-    res.redirect('/admin');
-  });
+  req.session.destroy(() => res.redirect('/admin'));
 });
 
 module.exports = router;

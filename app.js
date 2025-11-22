@@ -19,10 +19,14 @@ app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Session
+// Session setup with automatic table creation
 app.use(
   session({
-    store: new pgSession({ pool }),
+    store: new pgSession({
+      pool,
+      tableName: 'session',       // default table name
+      createTableIfMissing: true, // automatically create table
+    }),
     secret: process.env.SESSION_SECRET || 'secret',
     resave: false,
     saveUninitialized: false,
@@ -30,8 +34,11 @@ app.use(
   })
 );
 
-// Middleware to pass user to templates
-app.use(setUser);
+// Middleware to pass user to templates safely
+app.use((req, res, next) => {
+  res.locals.user = req.session?.user || null;
+  next();
+});
 
 // EJS
 app.use(expressLayout);
