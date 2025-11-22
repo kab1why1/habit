@@ -1,0 +1,15 @@
+<main>
+  <div class="card">
+    <h2>Create Habit</h2>
+    <form action="/habits/new" method="POST">
+      <label>Title</label>
+      <input type="text" name="title" required>
+
+      <label>Description</label>
+      <textarea name="description"></textarea>
+
+      <button type="submit" class="btn btn-primary">Create</button>
+      <a href="/" class="btn">Cancel</a>
+    </form>
+  </div>
+</main>

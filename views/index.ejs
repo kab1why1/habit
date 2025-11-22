@@ -1,6 +1,5 @@
 <% const habits = (locals && locals.habits) ? locals.habits : []; %>
 
-
 <main>
   <section class="stats-grid">
     <div class="card">
@@ -24,7 +23,7 @@
   <section class="week">
     <h2>This Week</h2>
     <div class="week-days">
-      <!-- your week markup (static or dynamic) -->
+      <!-- your week markup -->
     </div>
   </section>
 
@@ -33,15 +32,24 @@
       <div class="empty-icon">🎯</div>
       <h3>No habits yet</h3>
       <p>Create your first habit to start your journey</p>
-      <a href="#" class="create-btn">+ Create Your First Habit</a>
+      <% if (user) { %>
+        <a href="/habits/new" class="create-btn">+ Create Your First Habit</a>
+      <% } else { %>
+        <a href="/login" class="create-btn">Login to create a habit</a>
+      <% } %>
     <% } else { %>
       <% habits.forEach(h => { %>
-        <div class="card">
+        <div class="card habit-list-item">
           <h4><a href="/habits/<%= h.id %>"><%= h.title %></a></h4>
           <p><%= h.description ? h.description.slice(0, 150) : '' %></p>
+          <div class="habit-controls">
+            <a href="/habits/<%= h.id %>/edit" class="btn btn-small">Edit</a>
+            <form action="/habits/<%= h.id %>/delete" method="POST" style="display:inline;">
+              <button type="submit" class="btn btn-danger btn-small" onclick="return confirm('Delete this habit?')">Delete</button>
+            </form>
+          </div>
         </div>
       <% }) %>
     <% } %>
   </section>
 </main>
-
