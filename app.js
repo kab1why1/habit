@@ -2,29 +2,48 @@ require('dotenv').config();
 
 const express = require('express');
 const expressLayout = require('express-ejs-layouts');
-const { testConnection } = require('./server/config/db');
-const { createHabitsTable } = require('./server/models/habit');
+const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
+
+const { testConnection, pool } = require('./server/config/db');
+
+const mainRoutes = require('./server/routes/main');
+const adminRoutes = require('./server/routes/admin');
+const setUser = require('./server/middleware/setUser');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Public
+// Static files
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Views
+// Session
+app.use(
+  session({
+    store: new pgSession({ pool }),
+    secret: process.env.SESSION_SECRET || 'secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 1000 * 60 * 60 * 24 }, // 1 day
+  })
+);
+
+// Middleware to pass user to templates
+app.use(setUser);
+
+// EJS
 app.use(expressLayout);
 app.set('layout', './layouts/main');
 app.set('view engine', 'ejs');
 
 // Routes
-app.use('/', require('./server/routes/main'));
+app.use('/', mainRoutes);
+app.use('/admin', adminRoutes);
 
-// Server
+// Start server
 app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
   await testConnection();
-  await createHabitsTable();
-  console.log("Habits table ready");
 });

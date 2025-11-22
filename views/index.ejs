@@ -1,54 +1,47 @@
-<div class="container">
-    <main>
+<% const habits = (locals && locals.habits) ? locals.habits : []; %>
 
-        <section class="stats-grid">
-            <div class="card">
-                <h3>Total Habits</h3>
-                <p class="value"><%= locals.habits.length %></p>
-            </div>
-            <div class="card">
-                <h3>Today's Progress</h3>
-                <p class="value">0/0</p>
-            </div>
-            <div class="card">
-                <h3>Best Streak</h3>
-                <p class="value">0 days</p>
-            </div>
-            <div class="card">
-                <h3>Total Completions</h3>
-                <p class="value">0</p>
-            </div>
-        </section>
 
-        <section class="week">
-            <h2>Your Habits</h2>
+<main>
+  <section class="stats-grid">
+    <div class="card">
+      <h3>Total Habits</h3>
+      <p class="value"><%= habits.length %></p>
+    </div>
+    <div class="card">
+      <h3>Today's Progress</h3>
+      <p class="value">0/0</p>
+    </div>
+    <div class="card">
+      <h3>Best Streak</h3>
+      <p class="value">0 days</p>
+    </div>
+    <div class="card">
+      <h3>Total Completions</h3>
+      <p class="value">1</p>
+    </div>
+  </section>
 
-            <% if (locals.habits.length === 0) { %>
-                <p>No habits yet. Add one!</p>
-            <% } else { %>
+  <section class="week">
+    <h2>This Week</h2>
+    <div class="week-days">
+      <!-- your week markup (static or dynamic) -->
+    </div>
+  </section>
 
-                <div class="week-days" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+  <section class="today-habits">
+    <% if (habits.length === 0) { %>
+      <div class="empty-icon">🎯</div>
+      <h3>No habits yet</h3>
+      <p>Create your first habit to start your journey</p>
+      <a href="#" class="create-btn">+ Create Your First Habit</a>
+    <% } else { %>
+      <% habits.forEach(h => { %>
+        <div class="card">
+          <h4><a href="/habits/<%= h.id %>"><%= h.title %></a></h4>
+          <p><%= h.description ? h.description.slice(0, 150) : '' %></p>
+        </div>
+      <% }) %>
+    <% } %>
+  </section>
+</main>
 
-                    <% locals.habits.forEach(habit => { %>
-                        <a href="/habit/<%= habit.id %>" class="day" style="text-decoration:none;">
-                            <strong><%= habit.title %></strong>
-                            <span class="date"><%= habit.id %></span>
-                            <span class="small"><%= habit.description %></span>
-                        </a>
-                    <% }) %>
-
-                </div>
-
-            <% } %>
-
-        </section>
-
-        <section class="today-habits">
-            <div class="empty-icon">✨</div>
-            <h3>Create a new habit</h3>
-            <p>Your future self will thank you</p>
-            <a href="#" class="create-btn">+ Add Habit</a>
-        </section>
-
-    </main>
-</div>

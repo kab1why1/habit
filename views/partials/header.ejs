@@ -1,7 +1,17 @@
-<header>
-    <div class="header-left">
-        <h1>HabitFlow</h1>
-        <p class="subtitle">Track your habits, build your future</p>
-    </div>
-    <a href="#" class="btn">+ New Habit</a>
+<header class="main-header">
+  <div class="header-left">
+    <h1 class="logo">HabitFlow</h1>
+    <p class="subtitle">Track your habits, build your future</p>
+  </div>
+  <div class="header-right">
+    <ul class="nav-links">
+      <% if (!user) { %>
+        <li><a href="/register" class="btn btn-primary">Let's Get Started</a></li>
+        <li><a href="/login" class="btn btn-secondary">Login</a></li>
+      <% } else { %>
+        <li><span class="welcome">Hello, <%= user.username %>!</span></li>
+        <li><a href="/logout" class="btn btn-secondary">Logout</a></li>
+      <% } %>
+    </ul>
+  </div>
 </header>

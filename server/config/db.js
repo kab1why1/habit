@@ -1,4 +1,3 @@
-// server/config/db.js
 const { Pool } = require('pg');
 
 const pool = new Pool({
@@ -16,7 +15,6 @@ async function query(text, params) {
   const start = Date.now();
   try {
     const res = await pool.query(text, params);
-    const duration = Date.now() - start;
     return res;
   } catch (err) {
     console.error('DB Query Error', err);
@@ -39,8 +37,4 @@ async function testConnection() {
   }
 }
 
-module.exports = {
-  pool,
-  query,
-  testConnection,
-};
+module.exports = { pool, query, testConnection };
