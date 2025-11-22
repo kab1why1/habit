@@ -1,17 +1,15 @@
-<div class="container">
-    <main>
-        <div class="card" style="margin-top:20px;">
+<% const habit = locals && locals.habit; %>
 
-            <h2><%= habit.title %></h2>
-            <p style="margin-top:10px; font-size:15px; color:#aaa;">
-                <%= habit.description %>
-            </p>
-
-            <p style="margin-top:20px; font-size:13px; color:#777;">
-                Created at: <%= habit.created_at.toLocaleString() %>
-            </p>
-
-            <a href="/" class="btn" style="margin-top:20px; display:inline-block;">← Back</a>
-        </div>
-    </main>
-</div>
+<main>
+  <section style="margin-top:20px;">
+    <div class="card">
+      <h2><%= habit.title %></h2>
+      <p class="small">Created: <%= new Date(habit.created_at).toLocaleString() %></p>
+      <p style="margin-top:12px;"><%= habit.description %></p>
+      <!-- future actions (edit, mark done, stats) go here -->
+      <div style="margin-top:14px;">
+        <a href="/" class="btn">Back</a>
+      </div>
+    </div>
+  </section>
+</main>

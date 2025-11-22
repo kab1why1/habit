@@ -59,6 +59,104 @@ header {
     transform: translateY(-1px);
 }
 
+/* Main App Header */
+.main-header, .admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 30px;
+  background: #141414;
+  border-radius: 8px;
+  border: 1px solid #222;
+  margin-bottom: 20px;
+}
+
+.main-header .logo, .admin-header .logo {
+  font-size: 26px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.main-header .subtitle {
+  font-size: 14px;
+  color: #6b6b6b;
+  margin-top: 4px;
+}
+
+.header-right .nav-links {
+  display: flex;
+  gap: 15px;
+  list-style: none;
+}
+
+.header-right .nav-links li {
+  margin: 0;
+}
+
+.header-right .nav-links a.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: #4f46e5;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #4338ca;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: #fff;
+  color: #0a0a0a;
+}
+
+.btn-secondary:hover {
+  background: #e5e5e5;
+  transform: translateY(-1px);
+}
+
+.welcome {
+  color: #fff;
+  font-weight: 500;
+}
+
+/* Admin Header */
+.admin-header {
+  padding: 20px 30px;
+  justify-content: space-between;
+}
+
+.admin-header .logout-btn {
+  padding: 8px 16px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .main-header, .admin-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .header-right .nav-links {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .header-right .nav-links a.btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+
 /* Stats Grid */
 .stats-grid {
     display: grid;
