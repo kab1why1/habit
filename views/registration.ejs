@@ -1,5 +1,5 @@
 <main class="auth-page">
-  <h2>Login</h2>
+  <h2>Register</h2>
 
   <% if (locals && locals.errors && locals.errors.length) { %>
     <ul class="errors">
@@ -9,11 +9,18 @@
     </ul>
   <% } %>
 
-  <form action="/login" method="POST">
+  <form action="/register" method="POST">
     <input type="text" name="username" placeholder="Username" required />
     <input type="password" name="password" placeholder="Password" required />
-    <button type="submit" class="btn btn-primary">Login</button>
+
+    <label for="role">Register as</label>
+    <select name="role" id="role">
+      <option value="user" selected>Regular user</option>
+      <option value="admin">Admin</option>
+    </select>
+
+    <button type="submit" class="btn btn-primary">Register</button>
   </form>
 
-  <p>Don't have an account? <a href="/register">Register</a></p>
+  <p>Already have an account? <a href="/login">Login here</a></p>
 </main>

@@ -1,113 +1,102 @@
+// server/routes/main.js
 const express = require('express');
 const router = express.Router();
 const { createUser, findByUsername } = require('../models/user');
 const bcrypt = require('bcrypt');
 
-// TEMP: create a sample post function
+// TEMP: posts (habits)
 const { createPost, getAllPosts } = require('../models/post');
-
-async function insertPostData() {
-    try {
-        await createPost({
-            title: "My first habit post",
-            description: "This is a test post to check if PostgreSQL works."
-        });
-        console.log("Sample post inserted!");
-    } catch (err) {
-        console.error("Error inserting post:", err);
-    }
-}
-
-// insertPostData(); // run once
 
 // Home page
 router.get('/', async (req, res) => {
-    const posts = await getAllPosts();
-    const locals = {
-        title: "HabitFlow",
-        description: "Just an app to track your habits",
-        posts,
-        user: req.session?.user || null
-    };
-    res.render('index', { locals });
+  const posts = await getAllPosts();
+  // pass posts as habits (your views use locals.habits)
+  res.render('index', { locals: {
+    title: "HabitFlow",
+    description: "Just an app to track your habits",
+    habits: posts,
+    user: req.session?.user || null
+  }});
 });
 
-// Register page
+// Register page (GET)
 router.get('/register', (req, res) => {
-    res.render('register', { locals: { title: "Register", user: null, errors: [] } });
+  res.render('registration', { locals: { title: "Register", errors: [], user: req.session?.user || null } });
 });
 
-// Handle registration
+// Handle registration (POST)
 router.post('/register', async (req, res) => {
-    const { username, password } = req.body;
-    const errors = [];
+  const { username, password, role } = req.body;
+  const errors = [];
 
-    if (!username || !password) {
-        errors.push("All fields are required");
-        return res.render('register', { locals: { title: "Register", errors, user: null } });
+  if (!username || !password) {
+    errors.push("All fields are required");
+    return res.render('registration', { locals: { title: "Register", errors, user: req.session?.user || null } });
+  }
+
+  try {
+    const existing = await findByUsername(username);
+    if (existing) {
+      errors.push("Username already exists");
+      return res.render('registration', { locals: { title: "Register", errors, user: req.session?.user || null } });
     }
 
-    try {
-        const existingUser = await findByUsername(username);
-        if (existingUser) {
-            errors.push("Username already exists");
-            return res.render('register', { locals: { title: "Register", errors, user: null } });
-        }
+    const hashed = await bcrypt.hash(password, 10);
+    const is_admin = role === 'admin'; // role comes from form select
 
-        const hashedPassword = await bcrypt.hash(password, 10);
-        await createUser({ username, password: hashedPassword });
+    await createUser({ username, password: hashed, is_admin });
 
-        res.redirect('/login');
-    } catch (err) {
-        console.error("Register error", err);
-        errors.push("Something went wrong");
-        res.render('register', { locals: { title: "Register", errors, user: null } });
-    }
+    // Optionally log them in automatically (commented out) or redirect to login
+    // req.session.user = { id: newUser.id, username: newUser.username, is_admin: newUser.is_admin };
+    res.redirect('/login');
+  } catch (err) {
+    console.error("Register error", err);
+    errors.push("Something went wrong");
+    res.render('registration', { locals: { title: "Register", errors, user: req.session?.user || null } });
+  }
 });
 
-// Login page
+// Login page (GET)
 router.get('/login', (req, res) => {
-    res.render('login', { locals: { title: "Login", user: null, errors: [] } });
+  res.render('login', { locals: { title: "Login", errors: [], user: req.session?.user || null } });
 });
 
-// Handle login
+// Handle login (POST) — **this route matches form action="/login"**
 router.post('/login', async (req, res) => {
-    const { username, password } = req.body;
-    const errors = [];
+  const { username, password } = req.body;
+  const errors = [];
 
-    if (!username || !password) {
-        errors.push("All fields are required");
-        return res.render('login', { locals: { title: "Login", errors, user: null } });
+  if (!username || !password) {
+    errors.push("All fields are required");
+    return res.render('login', { locals: { title: "Login", errors, user: req.session?.user || null } });
+  }
+
+  try {
+    const user = await findByUsername(username);
+    if (!user) {
+      errors.push("Invalid username or password");
+      return res.render('login', { locals: { title: "Login", errors, user: req.session?.user || null } });
     }
 
-    try {
-        const user = await findByUsername(username);
-        if (!user) {
-            errors.push("Invalid username or password");
-            return res.render('login', { locals: { title: "Login", errors, user: null } });
-        }
-
-        const match = await bcrypt.compare(password, user.password);
-        if (!match) {
-            errors.push("Invalid username or password");
-            return res.render('login', { locals: { title: "Login", errors, user: null } });
-        }
-
-        // Save user in session
-        req.session.user = { id: user.id, username: user.username, is_admin: user.is_admin };
-        res.redirect('/');
-    } catch (err) {
-        console.error("Login error", err);
-        errors.push("Something went wrong");
-        res.render('login', { locals: { title: "Login", errors, user: null } });
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+      errors.push("Invalid username or password");
+      return res.render('login', { locals: { title: "Login", errors, user: req.session?.user || null } });
     }
+
+    // Save user in session and redirect
+    req.session.user = { id: user.id, username: user.username, is_admin: user.is_admin };
+    return res.redirect('/');
+  } catch (err) {
+    console.error("Login error", err);
+    errors.push("Something went wrong");
+    return res.render('login', { locals: { title: "Login", errors, user: req.session?.user || null } });
+  }
 });
 
 // Logout
 router.get('/logout', (req, res) => {
-    req.session.destroy(() => {
-        res.redirect('/');
-    });
+  req.session.destroy(() => res.redirect('/'));
 });
 
 module.exports = router;
