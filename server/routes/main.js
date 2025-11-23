@@ -1,137 +1,193 @@
 const express = require('express');
 const router = express.Router();
-const { getAllHabits, getHabitById, createHabit, updateHabit, toggleHabitCompleted } = require('../models/habit');
-const { getUserByUsername, createUser } = require('../models/user');
+
+const {
+  createHabitsTable,
+  getAllHabits,
+  getHabitById,
+  createHabit,
+  updateHabit,
+  toggleHabitCompleted,
+  deleteHabit,
+} = require('../models/habit');
+
+const {
+  createUsersTable,
+  createUser,
+  getUserByUsername,
+} = require('../models/user');
+
+createHabitsTable().catch(err => console.error('createHabitsTable error', err));
+createUsersTable().catch(err => console.error('createUsersTable error', err));
 
 // Home page
 router.get('/', async (req, res) => {
-  const habits = req.user ? await getAllHabits(req.user.id) : [];
-  res.render('index', { habits, user: req.user });
+  let habits = [];
+  if (res.locals.user) {
+    habits = await getAllHabits(res.locals.user.id);
+  }
+  res.render('index', { habits });
 });
 
-// Habits routes
+// Habits manage page
 router.get('/habits/manage', async (req, res) => {
-  const habits = req.user ? await getAllHabits(req.user.id) : [];
-  res.render('habits/manage', { habits, user: req.user });
+  const habits = res.locals.user ? await getAllHabits(res.locals.user.id) : [];
+  res.render('habits/manage', { habits });
 });
 
+// Habit create
 router.get('/habits/new', (req, res) => {
-  res.render('habits/new', { errors: [], user: req.user });
+  res.render('habits/new', { errors: [] });
 });
 
 router.post('/habits/new', async (req, res) => {
-  const { title, description, category, color } = req.body;
   try {
-    await createHabit({ user_id: req.user.id, title, description, category, color });
+    const habit = {
+      user_id: res.locals.user.id,
+      title: req.body.title,
+      description: req.body.description,
+      category: req.body.category,
+      color: req.body.color,
+    };
+    await createHabit(habit);
     res.redirect('/habits/manage');
   } catch (err) {
-    console.error(err);
-    res.render('habits/new', { errors: [err.message], user: req.user });
+    console.error('Create habit error', err);
+    res.render('habits/new', { errors: [err.message] });
   }
 });
 
+// Habit show
 router.get('/habits/:id', async (req, res) => {
   try {
     const habit = await getHabitById(req.params.id);
-    res.render('habit', { habit, user: req.user });
+    res.render('habit', { habit });
   } catch (err) {
-    console.error(err);
-    res.render('habit', { habit: null, user: req.user });
+    console.error('Get habit error', err);
+    res.redirect('/habits/manage');
   }
 });
 
+// Habit edit
 router.get('/habits/:id/edit', async (req, res) => {
   try {
     const habit = await getHabitById(req.params.id);
-    res.render('habits/edit', { habit, user: req.user });
+    res.render('habits/edit', { habit });
   } catch (err) {
-    console.error(err);
+    console.error('Edit habit error', err);
     res.redirect('/habits/manage');
   }
 });
 
 router.post('/habits/:id/edit', async (req, res) => {
   try {
-    const { title, description, category, color } = req.body;
-    await updateHabit(req.params.id, { title, description, category, color });
+    await updateHabit(req.params.id, {
+      title: req.body.title,
+      description: req.body.description,
+      category: req.body.category,
+      color: req.body.color,
+    });
     res.redirect(`/habits/${req.params.id}`);
   } catch (err) {
-    console.error(err);
+    console.error('Update habit error', err);
     res.redirect('/habits/manage');
   }
 });
 
+// Habit toggle
 router.post('/habits/:id/toggle', async (req, res) => {
   try {
     await toggleHabitCompleted(req.params.id);
-    res.redirect('back');
+    res.redirect(req.get('Referrer') || '/');
   } catch (err) {
     console.error('Toggle habit error', err);
+    res.redirect('/');
+  }
+});
+
+// Habit delete
+router.post('/habits/:id/delete', async (req, res) => {
+  try {
+    await deleteHabit(req.params.id);
+    res.redirect('/habits/manage');
+  } catch (err) {
+    console.error('Delete habit error', err);
     res.redirect('/habits/manage');
   }
 });
 
-// Login & registration
-router.get('/login', (req, res) => res.render('login', { errors: [], user: req.user }));
+// Registration
+router.get('/register', (req, res) => {
+  res.render('registration', { errors: [] });
+});
+
+router.post('/register', async (req, res) => {
+  try {
+    const { username, password, role } = req.body;
+    const user = await createUser(username, password, role || 'user');
+    req.session.userId = user.id;
+    res.redirect('/');
+  } catch (err) {
+    console.error('Registration error', err);
+    res.render('registration', { errors: [err.message] });
+  }
+});
+
+// Login
+router.get('/login', (req, res) => {
+  res.render('login', { errors: [] });
+});
+
 router.post('/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
-    const user = await getUserByUsername(username);
-    if (!user) return res.render('login', { errors: ['User not found'], user: req.user });
+    const user = await getUserByUsername(req.body.username);
+    if (!user) return res.render('login', { errors: ['User not found'] });
 
     const bcrypt = require('bcrypt');
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.render('login', { errors: ['Invalid password'], user: req.user });
+    const valid = await bcrypt.compare(req.body.password, user.password);
+    if (!valid) return res.render('login', { errors: ['Invalid password'] });
 
     req.session.userId = user.id;
     res.redirect('/');
   } catch (err) {
     console.error('Login error', err);
-    res.render('login', { errors: [err.message], user: req.user });
+    res.render('login', { errors: [err.message] });
   }
 });
 
-router.get('/register', (req, res) => res.render('registration', { errors: [], user: req.user }));
-router.post('/register', async (req, res) => {
-  try {
-    const { username, password, role } = req.body;
-    await createUser({ username, password, role });
-    res.redirect('/login');
-  } catch (err) {
-    console.error('Registration error', err);
-    res.render('registration', { errors: [err.message], user: req.user });
-  }
-});
-
-router.get('/logout', (req, res) => {
-  req.session.destroy(() => res.redirect('/'));
-});
-
-router.get('/profile', async (req, res) => {
-  res.render('profile', { user: req.user, error: null });
+// Profile
+router.get('/profile', (req, res) => {
+  if (!res.locals.user) return res.redirect('/login');
+  res.render('profile', { user: res.locals.user, error: null });
 });
 
 router.post('/profile', async (req, res) => {
   try {
     const { username, password } = req.body;
+    const user = res.locals.user;
     const bcrypt = require('bcrypt');
+    let newPassword = user.password;
 
-    let hashedPassword = undefined;
-    if (password) hashedPassword = await bcrypt.hash(password, 10);
+    if (password) {
+      newPassword = await bcrypt.hash(password, 10);
+    }
 
     const query = `
-      UPDATE users
-      SET username = $1 ${hashedPassword ? ', password = $2' : ''}
-      WHERE id = $3
+      UPDATE users SET username=$1, password=$2 WHERE id=$3
     `;
-
-    const values = hashedPassword ? [username, hashedPassword, req.user.id] : [username, req.user.id];
-    await require('../config/db').pool.query(query, values);
-    res.redirect('/');
+    await require('../config/db').pool.query(query, [username, newPassword, user.id]);
+    res.redirect('/profile');
   } catch (err) {
     console.error('Profile update error', err);
-    res.render('profile', { user: req.user, error: err.message });
+    res.render('profile', { user: res.locals.user, error: err.message });
   }
+});
+
+// Logout
+router.get('/logout', (req, res) => {
+  req.session.destroy(err => {
+    res.redirect('/');
+  });
 });
 
 module.exports = router;

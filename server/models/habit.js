@@ -4,54 +4,71 @@ async function createHabitsTable() {
   const query = `
     CREATE TABLE IF NOT EXISTS habits (
       id SERIAL PRIMARY KEY,
-      user_id INTEGER REFERENCES users(id),
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
       title VARCHAR(255) NOT NULL,
       description TEXT,
-      category VARCHAR(255),
+      category VARCHAR(100),
       color VARCHAR(20),
-      completed BOOLEAN DEFAULT false,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
+      completed BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
   `;
   await pool.query(query);
 }
 
 async function getAllHabits(userId) {
   const query = 'SELECT * FROM habits WHERE user_id = $1 ORDER BY created_at DESC';
-  const { rows } = await pool.query(query, [userId]);
-  return rows;
+  const result = await pool.query(query, [userId]);
+  return result.rows;
 }
 
 async function getHabitById(id) {
   const query = 'SELECT * FROM habits WHERE id = $1';
-  const { rows } = await pool.query(query, [id]);
-  return rows[0];
+  const result = await pool.query(query, [id]);
+  return result.rows[0];
 }
 
-async function createHabit({ user_id, title, description, category, color }) {
+async function createHabit(habit) {
   const query = `
     INSERT INTO habits (user_id, title, description, category, color)
     VALUES ($1, $2, $3, $4, $5) RETURNING *
   `;
-  const values = [user_id, title, description, category, color];
-  const { rows } = await pool.query(query, values);
-  return rows[0];
+  const result = await pool.query(query, [
+    habit.user_id,
+    habit.title,
+    habit.description,
+    habit.category,
+    habit.color,
+  ]);
+  return result.rows[0];
 }
 
-async function updateHabit(id, { title, description, category, color }) {
+async function updateHabit(id, habit) {
   const query = `
-    UPDATE habits
-    SET title = $1, description = $2, category = $3, color = $4
-    WHERE id = $5
+    UPDATE habits SET title=$1, description=$2, category=$3, color=$4
+    WHERE id=$5 RETURNING *
   `;
-  await pool.query(query, [title, description, category, color, id]);
+  const result = await pool.query(query, [
+    habit.title,
+    habit.description,
+    habit.category,
+    habit.color,
+    id,
+  ]);
+  return result.rows[0];
 }
 
 async function toggleHabitCompleted(id) {
   const habit = await getHabitById(id);
   if (!habit) return null;
-  const query = 'UPDATE habits SET completed = $1 WHERE id = $2';
-  await pool.query(query, [!habit.completed, id]);
+  const query = 'UPDATE habits SET completed = $1 WHERE id=$2 RETURNING *';
+  const result = await pool.query(query, [!habit.completed, id]);
+  return result.rows[0];
+}
+
+async function deleteHabit(id) {
+  const query = 'DELETE FROM habits WHERE id = $1';
+  await pool.query(query, [id]);
 }
 
 module.exports = {
@@ -61,4 +78,5 @@ module.exports = {
   createHabit,
   updateHabit,
   toggleHabitCompleted,
+  deleteHabit,
 };
