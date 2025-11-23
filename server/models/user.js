@@ -1,64 +1,53 @@
-// server/models/user.js
-const { query } = require('../config/db');
+const { pool } = require('../config/db');
 const bcrypt = require('bcrypt');
 
-// Ensure table creation function (if you already had it keep it)
-async function createUsersTable() {
-  const sql = `
-    CREATE TABLE IF NOT EXISTS users (
-      id SERIAL PRIMARY KEY,
-      username VARCHAR(255) UNIQUE NOT NULL,
-      password TEXT NOT NULL,
-      is_admin BOOLEAN DEFAULT FALSE,
-      created_at TIMESTAMP DEFAULT NOW()
-    );
-  `;
-  return query(sql);
-}
-
-async function createUser({ username, password, is_admin = false }) {
-  // assume password may already be hashed in some callers; caller can pass hashed or plain
-  // here we check: if password looks short (<=60) we still will hash — safe approach:
+// Create a new user
+async function createUser(username, password, role = 'user') {
   const hashed = await bcrypt.hash(password, 10);
-  const sql = `
-    INSERT INTO users (username, password, is_admin)
-    VALUES ($1, $2, $3)
-    RETURNING *;
-  `;
-  const result = await query(sql, [username, hashed, is_admin]);
+  const result = await pool.query(
+    'INSERT INTO users (username, password, role) VALUES ($1, $2, $3) RETURNING *',
+    [username, hashed, role]
+  );
   return result.rows[0];
 }
 
-async function findByUsername(username) {
-  const sql = `SELECT * FROM users WHERE username = $1`;
-  const result = await query(sql, [username]);
+// Get user by username
+async function getUserByUsername(username) {
+  const result = await pool.query(
+    'SELECT * FROM users WHERE username = $1',
+    [username]
+  );
   return result.rows[0];
 }
 
+// Get user by ID
 async function getUserById(id) {
-  const sql = `SELECT id, username, is_admin, created_at FROM users WHERE id = $1`;
-  const result = await query(sql, [id]);
+  const result = await pool.query(
+    'SELECT * FROM users WHERE id = $1',
+    [id]
+  );
   return result.rows[0];
 }
 
-async function updateUser(id, { username, password }) {
-  // If password provided, hash it
+// Update user info
+async function updateUser(id, username, password) {
   if (password && password.length > 0) {
     const hashed = await bcrypt.hash(password, 10);
-    const sql = `UPDATE users SET username=$1, password=$2 WHERE id=$3 RETURNING id, username, is_admin`;
-    const result = await query(sql, [username, hashed, id]);
-    return result.rows[0];
+    await pool.query(
+      'UPDATE users SET username = $1, password = $2 WHERE id = $3',
+      [username, hashed, id]
+    );
   } else {
-    const sql = `UPDATE users SET username=$1 WHERE id=$2 RETURNING id, username, is_admin`;
-    const result = await query(sql, [username, id]);
-    return result.rows[0];
+    await pool.query(
+      'UPDATE users SET username = $1 WHERE id = $2',
+      [username, id]
+    );
   }
 }
 
 module.exports = {
-  createUsersTable,
   createUser,
-  findByUsername,
+  getUserByUsername,
   getUserById,
-  updateUser,
+  updateUser
 };

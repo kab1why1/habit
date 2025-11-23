@@ -1,12 +1,10 @@
 require('dotenv').config();
-
 const express = require('express');
 const expressLayout = require('express-ejs-layouts');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 
 const { testConnection, pool } = require('./server/config/db');
-
 const mainRoutes = require('./server/routes/main');
 const adminRoutes = require('./server/routes/admin');
 const setUser = require('./server/middleware/setUser');
