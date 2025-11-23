@@ -1,14 +1,6 @@
 <div class="container">
   <h1>Create a New Habit</h1>
 
-  <% if (locals.errors && locals.errors.length) { %>
-    <ul class="errors">
-      <% locals.errors.forEach(e => { %>
-        <li style="color:red"><%= e %></li>
-      <% }) %>
-    </ul>
-  <% } %>
-
   <form action="/habits/new" method="POST" style="margin-top:20px;">
     <label>Title:</label>
     <input type="text" name="title" required>
@@ -19,20 +11,51 @@
     <label>Category:</label>
     <input type="text" name="category" placeholder="e.g. Health, Study, Fitness">
 
-    <label>Color:</label>
-    <select name="color">
-      <option value="#5b4ef5">Purple</option>
-      <option value="#ef4444">Red</option>
-      <option value="#10b981">Green</option>
-      <option value="#f59e0b">Orange</option>
-      <option value="#3b82f6">Blue</option>
-      <option value="#8b5cf6">Violet</option>
-      <option value="#ef6c00">Amber</option>
-    </select>
+    <label>Color (hex or css color):</label>
+    <input type="text" name="color" placeholder="#5b4ef5">
 
-    <div style="margin-top:12px;">
-      <button class="btn" type="submit">Create Habit</button>
-      <a href="/" class="btn" style="margin-left:8px;">Cancel</a>
-    </div>
+    <button class="btn" type="submit">Create Habit</button>
   </form>
-</div>
+</div><main class="habit-page">
+  <h2>Edit Habit</h2>
+
+  <% if (!habit) { %>
+    <p>Habit not found</p>
+    <a href="/" class="btn btn-secondary">Back</a>
+  <% } else { %>
+    <% if (locals && locals.errors && locals.errors.length) { %>
+      <ul class="errors">
+        <% locals.errors.forEach(err => { %>
+          <li style="color:red;"><%= err %></li>
+        <% }); %>
+      </ul>
+    <% } %>
+
+    <form action="/habits/<%= habit.id %>/edit" method="POST">
+      <label for="title">Habit Title</label>
+      <input type="text" name="title" id="title" value="<%= habit.title %>" required>
+
+      <label for="description">Description</label>
+      <textarea name="description" id="description"><%= habit.description %></textarea>
+
+      <label for="category">Category</label>
+      <select name="category" id="category" required>
+        <% const categories = ['General','Health','Work','Learning','Fitness']; %>
+        <% categories.forEach(c => { %>
+          <option value="<%= c %>" <%= habit.category === c ? 'selected' : '' %>><%= c %></option>
+        <% }) %>
+      </select>
+
+      <label for="color">Color</label>
+      <select name="color" id="color" required>
+        <% const colors = { '#5b4ef5':'Purple', '#ff6b6b':'Red', '#4caf50':'Green', '#ffb74d':'Orange', '#03a9f4':'Blue' }; %>
+        <% Object.entries(colors).forEach(([val,name]) => { %>
+          <option value="<%= val %>" <%= habit.color === val ? 'selected' : '' %>><%= name %></option>
+        <% }) %>
+      </select>
+
+      <button type="submit" class="btn btn-primary">Save Changes</button>
+      <a href="/" class="btn btn-secondary">Cancel</a>
+    </form>
+  <% } %>
+</main>
