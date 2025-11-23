@@ -1,0 +1,24 @@
+<h2>Edit Habit</h2>
+
+<form action="/admin/habits/<%= habit.id %>/edit" method="POST">
+  <label>Title</label>
+  <input name="title" value="<%= habit.title %>" required />
+
+  <label>Description</label>
+  <textarea name="description"><%= habit.description || '' %></textarea>
+
+  <label>Category</label>
+  <input name="category" value="<%= habit.category || '' %>" />
+
+  <label>Color</label>
+  <input name="color" value="<%= habit.color || '' %>" />
+
+  <label>
+    <input type="checkbox" name="completed" <%= habit.completed ? 'checked' : '' %> /> Completed
+  </label>
+
+  <div style="margin-top:12px;">
+    <button class="btn" type="submit">Save</button>
+    <a href="/admin/habits" class="btn">Cancel</a>
+  </div>
+</form>

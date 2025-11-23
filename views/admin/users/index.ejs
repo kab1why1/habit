@@ -1,0 +1,26 @@
+<h2>All Users</h2>
+<a href="/admin/users/new" class="btn">Create user</a>
+
+<table style="width:100%;margin-top:12px;border-collapse:collapse;">
+  <thead>
+    <tr style="text-align:left">
+      <th>ID</th><th>Username</th><th>Role</th><th>Created</th><th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% users.forEach(u => { %>
+      <tr>
+        <td><%= u.id %></td>
+        <td><%= u.username %></td>
+        <td><%= u.role %></td>
+        <td><%= new Date(u.created_at).toLocaleString() %></td>
+        <td>
+          <a href="/admin/users/<%= u.id %>/edit" class="btn tiny-btn">Edit</a>
+          <form action="/admin/users/<%= u.id %>/delete" method="POST" style="display:inline">
+            <button type="submit" class="btn tiny-btn delete-btn" onclick="return confirm('Delete user?')">Delete</button>
+          </form>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>

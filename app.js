@@ -38,7 +38,9 @@ app.set('view engine', 'ejs');
 
 // Routes
 app.use('/', mainRoutes);
+app.use(setUser);
 app.use('/admin', adminRoutes);
+
 
 // Start server
 app.listen(PORT, async () => {

@@ -1,0 +1,25 @@
+<h2>All Habits</h2>
+<table style="width:100%;margin-top:12px;border-collapse:collapse;">
+  <thead>
+    <tr style="text-align:left;">
+      <th>ID</th><th>Title</th><th>User ID</th><th>Category</th><th>Completed</th><th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% habits.forEach(h => { %>
+      <tr>
+        <td><%= h.id %></td>
+        <td><%= h.title %></td>
+        <td><%= h.user_id %></td>
+        <td><%= h.category || '—' %></td>
+        <td><%= h.completed ? 'Yes' : 'No' %></td>
+        <td>
+          <a href="/admin/habits/<%= h.id %>/edit" class="btn tiny-btn">Edit</a>
+          <form action="/admin/habits/<%= h.id %>/delete" method="POST" style="display:inline">
+            <button type="submit" class="btn tiny-btn delete-btn" onclick="return confirm('Delete habit?')">Delete</button>
+          </form>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>

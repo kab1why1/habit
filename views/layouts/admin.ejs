@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Panel</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin - <%= locals && locals.title ? locals.title : 'Panel' %></title>
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
   <div class="container">
     <%- include('../partials/header_admin.ejs') %>
-    <%- body %>
+    <main style="margin-top:20px;">
+      <%- body %>
+    </main>
   </div>
 </body>
 </html>

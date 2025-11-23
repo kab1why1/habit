@@ -6,14 +6,18 @@
 
   <div class="header-right">
     <ul class="nav-links">
-      <% const currentUser = (locals && locals.user) ? locals.user : null; %>
-      <% if (!currentUser) { %>
+      <% if (!user) { %>
         <li><a href="/register" class="btn btn-primary">Let's Get Started</a></li>
         <li><a href="/login" class="btn btn-secondary">Login</a></li>
       <% } else { %>
-        <li><span class="welcome">Hello, <%= currentUser.username %>!</span></li>
+        <li><span class="welcome">Hello, <%= user.username %>!</span></li>
         <li><a href="/profile" class="btn btn-primary">Profile</a></li>
         <li><a href="/habits/manage" class="btn btn-secondary">My Habits</a></li>
+        
+        <% if (user.role === 'admin') { %>
+          <li><a href="/admin/dashboard" class="btn btn-warning">Admin Panel</a></li>
+        <% } %>
+
         <li><a href="/logout" class="btn btn-secondary">Logout</a></li>
       <% } %>
     </ul>
