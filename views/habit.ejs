@@ -1,15 +1,40 @@
-<% const habit = locals && locals.habit; %>
+<% 
+  const habit = (locals && locals.habit) ? locals.habit : null;
+%>
 
 <main>
   <section style="margin-top:20px;">
     <div class="card">
-      <h2><%= habit.title %></h2>
-      <p class="small">Created: <%= new Date(habit.created_at).toLocaleString() %></p>
-      <p style="margin-top:12px;"><%= habit.description %></p>
-      <!-- future actions (edit, mark done, stats) go here -->
-      <div style="margin-top:14px;">
+      <% if (!habit) { %>
+        <h2>Habit not found</h2>
         <a href="/" class="btn">Back</a>
-      </div>
+      <% } else { %>
+        <% 
+          const color = habit.color || '#5b4ef5';
+          const category = habit.category || 'General';
+        %>
+
+        <h2 style="display:flex;align-items:center;gap:12px;">
+          <span><%= habit.title %></span>
+          <span style="font-size:14px;color:#666;">(<%= category %>)</span>
+          <span style="width:14px; height:14px; background: '<%= color %>'; display:inline-block; border-radius:3px; margin-left:8px;"></span>
+        </h2>
+
+        <p class="small">Created: <%= new Date(habit.created_at).toLocaleString() %></p>
+
+        <p style="margin-top:12px;"><%= habit.description %></p>
+
+        <div style="margin-top:14px; display:flex; gap:8px;">
+          <form action="/habits/<%= habit.id %>/toggle" method="POST" style="display:inline;">
+            <button class="btn" type="submit">
+              <%= habit.completed ? 'Mark as not completed' : 'Mark as completed' %>
+            </button>
+          </form>
+
+          <a href="/habits/<%= habit.id %>/edit" class="btn">Edit</a>
+          <a href="/" class="btn">Back</a>
+        </div>
+      <% } %>
     </div>
   </section>
 </main>

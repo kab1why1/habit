@@ -1,14 +1,26 @@
+<% const habit = locals.habit; %>
+
 <main>
-  <h2>Edit Habit</h2>
-  <% if (locals.error) { %><p style="color:red"><%= locals.error %></p><% } %>
-  <form action="/habits/<%= locals.habit.id %>/edit" method="POST">
-    <label>Title</label>
-    <input name="title" value="<%= locals.habit.title %>" required>
-    <label>Description</label>
-    <textarea name="description"><%= locals.habit.description %></textarea>
-    <button type="submit" class="btn btn-primary">Save</button>
-  </form>
-  <form action="/habits/<%= locals.habit.id %>/delete" method="POST" style="margin-top:12px;">
-    <button type="submit" class="btn btn-danger">Delete</button>
-  </form>
+  <div class="container">
+    <h2>Edit Habit</h2>
+
+    <form action="/habits/<%= habit.id %>/edit" method="POST" style="margin-top:14px;">
+      <label>Title</label>
+      <input type="text" name="title" value="<%= habit.title %>" required>
+
+      <label>Description</label>
+      <textarea name="description"><%= habit.description || '' %></textarea>
+
+      <label>Category</label>
+      <input type="text" name="category" value="<%= habit.category || '' %>">
+
+      <label>Color</label>
+      <input type="text" name="color" value="<%= habit.color || '' %>">
+
+      <div style="margin-top:12px;">
+        <button class="btn" type="submit">Save</button>
+        <a href="/habits/<%= habit.id %>" class="btn">Cancel</a>
+      </div>
+    </form>
+  </div>
 </main>

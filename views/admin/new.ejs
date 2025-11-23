@@ -1,12 +1,18 @@
 <div class="container">
   <h1>Create a New Habit</h1>
 
-  <form action="/admin/new" method="POST" style="margin-top:20px;">
+  <form action="/habits/new" method="POST" style="margin-top:20px;">
     <label>Title:</label>
     <input type="text" name="title" required>
 
     <label>Description:</label>
     <textarea name="description"></textarea>
+
+    <label>Category:</label>
+    <input type="text" name="category" placeholder="e.g. Health, Study, Fitness">
+
+    <label>Color (hex or css color):</label>
+    <input type="text" name="color" placeholder="#5b4ef5">
 
     <button class="btn" type="submit">Create Habit</button>
   </form>
