@@ -1,13 +1,13 @@
 const { getUserById } = require('../models/user');
 
-module.exports = async function (req, res, next) {
-  if (req.session && req.session.userId) {
-    const user = await getUserById(req.session.userId);
-    res.locals.user = user || null;
-    req.user = user || null;
-  } else {
-    res.locals.user = null;
-    req.user = null;
+module.exports = async (req, res, next) => {
+  if (req.session.userId) {
+    try {
+      const user = await getUserById(req.session.userId);
+      res.locals.user = user;
+    } catch (err) {
+      console.error('setUser error', err);
+    }
   }
   next();
 };
