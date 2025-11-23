@@ -9,6 +9,8 @@ const { testConnection, pool } = require('./server/config/db');
 
 const mainRoutes = require('./server/routes/main');
 const adminRoutes = require('./server/routes/admin');
+const profileRoutes = require('./server/routes/profile');
+const habitsRoutes = require('./server/routes/habits');
 const setUser = require('./server/middleware/setUser');
 
 const app = express();
@@ -41,6 +43,8 @@ app.set('view engine', 'ejs');
 // Routes
 app.use('/', mainRoutes);
 app.use('/admin', adminRoutes);
+app.use('/profile', profileRoutes);
+app.use('/habits', habitsRoutes);
 
 // Start server
 app.listen(PORT, async () => {
