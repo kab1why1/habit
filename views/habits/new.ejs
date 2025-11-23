@@ -1,15 +1,25 @@
-<main>
-  <div class="card">
-    <h2>Create Habit</h2>
-    <form action="/habits/new" method="POST">
-      <label>Title</label>
-      <input type="text" name="title" required>
+<main class="form-page">
+  <h2>Create New Habit</h2>
 
-      <label>Description</label>
-      <textarea name="description"></textarea>
+  <% if (locals.errors && locals.errors.length) { %>
+    <ul class="errors">
+      <% locals.errors.forEach(e => { %><li><%= e %></li><% }) %>
+    </ul>
+  <% } %>
 
-      <button type="submit" class="btn btn-primary">Create</button>
-      <a href="/" class="btn">Cancel</a>
-    </form>
-  </div>
+  <form action="/habits/new" method="POST">
+    <label>Title</label>
+    <input type="text" name="title" required>
+
+    <label>Description</label>
+    <textarea name="description"></textarea>
+
+    <label>Category</label>
+    <input type="text" name="category" placeholder="e.g. Health, Study">
+
+    <label>Color (hex or name)</label>
+    <input type="text" name="color" placeholder="#ff7b7b">
+
+    <button type="submit" class="btn btn-primary">Create Habit</button>
+  </form>
 </main>

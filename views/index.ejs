@@ -1,4 +1,7 @@
-<% const habits = (locals && locals.habits) ? locals.habits : []; %>
+<% 
+  const habits = (locals && locals.habits) ? locals.habits : [];
+  const user = (locals && locals.user) ? locals.user : null;
+%>
 
 <main>
   <section class="stats-grid">
@@ -23,33 +26,53 @@
   <section class="week">
     <h2>This Week</h2>
     <div class="week-days">
-      <!-- your week markup -->
+      <!-- static for now, can be generated later -->
     </div>
   </section>
 
   <section class="today-habits">
-    <% if (habits.length === 0) { %>
+    <% if (!user) { %>
+      <div class="empty-icon">🎯</div>
+      <h3>Welcome — please <a href="/register">register</a> or <a href="/login">login</a> to manage habits</h3>
+
+    <% } else if (habits.length === 0) { %>
+
       <div class="empty-icon">🎯</div>
       <h3>No habits yet</h3>
       <p>Create your first habit to start your journey</p>
-      <% if (user) { %>
-        <a href="/habits/new" class="create-btn">+ Create Your First Habit</a>
-      <% } else { %>
-        <a href="/login" class="create-btn">Login to create a habit</a>
-      <% } %>
+      <a href="/habits/new" class="create-btn">+ Create Your First Habit</a>
+
     <% } else { %>
-      <% habits.forEach(h => { %>
-        <div class="card habit-list-item">
-          <h4><a href="/habits/<%= h.id %>"><%= h.title %></a></h4>
-          <p><%= h.description ? h.description.slice(0, 150) : '' %></p>
-          <div class="habit-controls">
-            <a href="/habits/<%= h.id %>/edit" class="btn btn-small">Edit</a>
-            <form action="/habits/<%= h.id %>/delete" method="POST" style="display:inline;">
-              <button type="submit" class="btn btn-danger btn-small" onclick="return confirm('Delete this habit?')">Delete</button>
-            </form>
+
+      <div class="habit-list">
+        <% habits.forEach(h => { 
+             const color = h.color || '#5b4ef5';
+             const category = h.category || 'General';
+        %>
+          <div class="card habit-card" style="border-left: 6px solid" <%= color %>;">
+            <h4>
+              <a href="/habits/<%= h.id %>"><%= h.title %></a>
+              <% if (h.completed) { %>
+                <span class="completed-badge">✔</span>
+              <% } %>
+            </h4>
+
+            <p class="small"><strong>Category:</strong> <%= category %></p>
+            <p><%= h.description ? h.description.slice(0, 200) : '' %></p>
+
+            <div class="habit-actions">
+              <form action="/habits/<%= h.id %>/toggle" method="POST" style="display:inline;">
+                <button type="submit" class="btn small-btn">
+                  <%= h.completed ? 'Undo' : 'Complete' %>
+                </button>
+              </form>
+
+              <a href="/habits/<%= h.id %>/edit" class="btn small-btn">Edit</a>
+            </div>
           </div>
-        </div>
-      <% }) %>
+        <% }) %>
+      </div>
+
     <% } %>
   </section>
 </main>

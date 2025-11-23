@@ -6,80 +6,84 @@ const bcrypt = require('bcrypt');
 const { createUser, findByUsername } = require('../models/user');
 const {
   createHabit,
-  getHabitsByUser,
+  getAllHabits,
   getHabitById,
-  createHabitsTable
+  toggleHabitCompleted,
+  updateHabit,
+  createHabitsTable,
 } = require('../models/habit');
 
-// ensure habits table exists (safe to call)
-createHabitsTable().catch(err => console.error('createHabitsTable error', err));
+// Ensure table exists (safe to call multiple times)
+(async () => {
+  try {
+    await createHabitsTable();
+  } catch (err) {
+    console.error('Error creating habits table', err);
+  }
+})();
 
-// Middleware: require login
+// Middleware: ensure logged in
 function ensureLoggedIn(req, res, next) {
   if (!req.session.user) return res.redirect('/login');
   next();
 }
 
-// Home page: show current user's habits (if logged in)
+// Home page — show only current user's habits (if logged in)
 router.get('/', async (req, res) => {
   try {
-    let habits = [];
-    if (req.session?.user?.id) {
-      habits = await getHabitsByUser(req.session.user.id);
-    }
+    const user = req.session?.user || null;
+    const habits = await getAllHabits(user ? user.id : null);
     res.render('index', {
       locals: {
-        title: "HabitFlow",
-        description: "Just an app to track your habits",
+        title: 'HabitFlow',
+        description: 'Track your habits and build your future',
         habits,
-        user: req.session?.user || null
-      }
+        user,
+      },
     });
   } catch (err) {
-    console.error('Home route error', err);
-    res.render('index', { locals: { title: "HabitFlow", habits: [], user: req.session?.user || null } });
+    console.error('Homepage error', err);
+    res.render('index', {
+      locals: { title: 'HabitFlow', description: '', habits: [], user: req.session?.user || null },
+    });
   }
 });
 
-// Registration (GET)
+// Register (GET)
 router.get('/register', (req, res) => {
   if (req.session.user) return res.redirect('/');
-  res.render('registration', { locals: { title: "Register", errors: [], user: null } });
+  res.render('registration', { locals: { title: 'Register', errors: [], user: null } });
 });
 
-// Registration (POST) — supports role select
+// Register (POST)
 router.post('/register', async (req, res) => {
   const { username, password, role } = req.body;
   const errors = [];
   if (!username || !password) {
-    errors.push("All fields are required");
-    return res.render('registration', { locals: { title: "Register", errors, user: null } });
+    errors.push('All fields are required');
+    return res.render('registration', { locals: { title: 'Register', errors, user: null } });
   }
-
   try {
     const existing = await findByUsername(username);
     if (existing) {
-      errors.push("Username already exists");
-      return res.render('registration', { locals: { title: "Register", errors, user: null } });
+      errors.push('Username already exists');
+      return res.render('registration', { locals: { title: 'Register', errors, user: null } });
     }
-
     const hashed = await bcrypt.hash(password, 10);
     const is_admin = role === 'admin';
     await createUser({ username, password: hashed, is_admin });
-
-    // Redirect to login (or auto-login if desired)
     return res.redirect('/login');
   } catch (err) {
-    console.error('Registration error', err);
-    errors.push("Something went wrong");
-    return res.render('registration', { locals: { title: "Register", errors, user: null } });
+    console.error('Register error', err);
+    errors.push('Something went wrong');
+    return res.render('registration', { locals: { title: 'Register', errors, user: null } });
   }
 });
 
 // Login (GET)
 router.get('/login', (req, res) => {
   if (req.session.user) return res.redirect('/');
-  res.render('login', { locals: { title: "Login", errors: [], user: null } });
+  res.render('login', { locals: { title: 'Login', errors: [], user: null } });
 });
 
 // Login (POST)
@@ -87,30 +91,27 @@ router.post('/login', async (req, res) => {
   const { username, password } = req.body;
   const errors = [];
   if (!username || !password) {
-    errors.push("All fields are required");
-    return res.render('login', { locals: { title: "Login", errors, user: null } });
+    errors.push('All fields are required');
+    return res.render('login', { locals: { title: 'Login', errors, user: null } });
   }
-
   try {
     const user = await findByUsername(username);
     if (!user) {
-      errors.push("Invalid username or password");
-      return res.render('login', { locals: { title: "Login", errors, user: null } });
+      errors.push('Invalid username or password');
+      return res.render('login', { locals: { title: 'Login', errors, user: null } });
     }
-
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
-      errors.push("Invalid username or password");
-      return res.render('login', { locals: { title: "Login", errors, user: null } });
+      errors.push('Invalid username or password');
+      return res.render('login', { locals: { title: 'Login', errors, user: null } });
     }
-
     // Save user in session
     req.session.user = { id: user.id, username: user.username, is_admin: user.is_admin };
     return res.redirect('/');
   } catch (err) {
     console.error('Login error', err);
-    errors.push("Something went wrong");
-    return res.render('login', { locals: { title: "Login", errors, user: null } });
+    errors.push('Something went wrong');
+    return res.render('login', { locals: { title: 'Login', errors, user: null } });
   }
 });
 
@@ -119,44 +120,34 @@ router.get('/logout', (req, res) => {
   req.session.destroy(() => res.redirect('/'));
 });
 
-// ---------- Habit routes ----------
-
-// Show create-habit page
+// Show create habit form (works for any logged-in user)
 router.get('/habits/new', ensureLoggedIn, (req, res) => {
-  res.render('habits/new', { locals: { title: 'Create Habit', user: req.session.user } });
+  res.render('admin/new', { locals: { user: req.session.user } });
 });
 
-// Handle new habit creation
+// Handle create habit
 router.post('/habits/new', ensureLoggedIn, async (req, res) => {
   try {
-    const { title, description } = req.body;
+    const { title, description, category, color } = req.body;
+    const user_id = req.session.user.id;
     if (!title) return res.redirect('/habits/new');
-
-    await createHabit({ title, description, user_id: req.session.user.id });
-    res.redirect('/habits/manage');
+    await createHabit({ title, description, category: category || null, color: color || null, user_id });
+    return res.redirect('/');
   } catch (err) {
     console.error('Create habit error', err);
-    res.redirect('/habits/new');
+    return res.redirect('/habits/new');
   }
 });
 
-// Manage habits (list owned habits, edit/delete links)
-router.get('/habits/manage', ensureLoggedIn, async (req, res) => {
-  try {
-    const habits = await getHabitsByUser(req.session.user.id);
-    res.render('habits/manage', { locals: { title: 'Manage Habits', habits, user: req.session.user } });
-  } catch (err) {
-    console.error('Manage habits error', err);
-    res.redirect('/');
-  }
-});
-
-// View single habit by id (owner or public)
+// View single habit
 router.get('/habits/:id', ensureLoggedIn, async (req, res) => {
   try {
     const habit = await getHabitById(req.params.id);
     if (!habit) return res.redirect('/');
-    // optional: verify ownership before showing edit controls in view
+    // Ensure the habit belongs to current user (simple auth)
+    if (habit.user_id && req.session.user && habit.user_id !== req.session.user.id && !req.session.user.is_admin) {
+      return res.redirect('/');
+    }
     res.render('habit', { locals: { habit, user: req.session.user } });
   } catch (err) {
     console.error('Get habit error', err);
@@ -164,52 +155,45 @@ router.get('/habits/:id', ensureLoggedIn, async (req, res) => {
   }
 });
 
-// Delete habit (POST)
-router.post('/habits/:id/delete', ensureLoggedIn, async (req, res) => {
+// Toggle completed
+router.post('/habits/:id/toggle', ensureLoggedIn, async (req, res) => {
   try {
-    const id = Number(req.params.id);
-    const habit = await getHabitById(id);
-    if (!habit) return res.redirect('/habits/manage');
-    if (habit.user_id !== req.session.user.id && !req.session.user.is_admin) {
-      return res.status(403).send('Forbidden');
-    }
-    const { deleteHabit } = require('../models/habit');
-    await deleteHabit(id);
-    res.redirect('/habits/manage');
+    const habit = await getHabitById(req.params.id);
+    if (!habit) return res.redirect('/');
+    if (habit.user_id && habit.user_id !== req.session.user.id && !req.session.user.is_admin) return res.redirect('/');
+    await toggleHabitCompleted(req.params.id);
+    res.redirect('back');
   } catch (err) {
-    console.error('Delete habit error', err);
-    res.redirect('/habits/manage');
+    console.error('Toggle error', err);
+    res.redirect('/');
   }
 });
 
-// Edit habit (show form)
+// Edit habit form
 router.get('/habits/:id/edit', ensureLoggedIn, async (req, res) => {
   try {
     const habit = await getHabitById(req.params.id);
-    if (!habit) return res.redirect('/habits/manage');
-    if (habit.user_id !== req.session.user.id && !req.session.user.is_admin) return res.redirect('/habits/manage');
+    if (!habit) return res.redirect('/');
+    if (habit.user_id && habit.user_id !== req.session.user.id && !req.session.user.is_admin) return res.redirect('/');
     res.render('habits/edit', { locals: { habit, user: req.session.user } });
   } catch (err) {
-    console.error('Edit habit (GET) error', err);
-    res.redirect('/habits/manage');
+    console.error('Edit page error', err);
+    res.redirect('/');
   }
 });
 
-// Edit habit (POST)
+// Handle edit
 router.post('/habits/:id/edit', ensureLoggedIn, async (req, res) => {
   try {
-    const id = Number(req.params.id);
-    const habit = await getHabitById(id);
-    if (!habit) return res.redirect('/habits/manage');
-    if (habit.user_id !== req.session.user.id && !req.session.user.is_admin) return res.redirect('/habits/manage');
-
-    const { title, description } = req.body;
-    const { updateHabit } = require('../models/habit');
-    await updateHabit(id, { title, description });
-    res.redirect('/habits/manage');
+    const habit = await getHabitById(req.params.id);
+    if (!habit) return res.redirect('/');
+    if (habit.user_id && habit.user_id !== req.session.user.id && !req.session.user.is_admin) return res.redirect('/');
+    const { title, description, category, color } = req.body;
+    await updateHabit(req.params.id, { title, description, category, color });
+    res.redirect(`/habits/${req.params.id}`);
   } catch (err) {
-    console.error('Edit habit (POST) error', err);
-    res.redirect('/habits/manage');
+    console.error('Update error', err);
+    res.redirect('/');
   }
 });
 
