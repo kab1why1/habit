@@ -1,2 +1,14 @@
-<h1>Welcome, <%= user.username %></h1>
-<p>This is the admin dashboard.</p>
+<h1>Admin Dashboard</h1>
+
+<div class="admin-cards" style="display:flex;gap:16px;margin-top:18px;">
+  <div class="card">
+    <h3>Users</h3>
+    <p><%= usersCount %></p>
+    <a href="/admin/users" class="btn">Manage users</a>
+  </div>
+  <div class="card">
+    <h3>Habits</h3>
+    <p><%= habitsCount %></p>
+    <a href="/admin/habits" class="btn">Manage habits</a>
+  </div>
+</div>

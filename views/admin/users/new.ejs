@@ -1,0 +1,18 @@
+<h2>Create User</h2>
+<% if (error) { %><p style="color:red;"><%= error %></p><% } %>
+<form action="/admin/users" method="POST">
+  <label>Username</label>
+  <input name="username" required />
+
+  <label>Password</label>
+  <input name="password" required type="password" />
+
+  <label>Role</label>
+  <select name="role">
+    <option value="user" selected>User</option>
+    <option value="admin">Admin</option>
+  </select>
+
+  <button class="btn" type="submit">Create</button>
+  <a href="/admin/users" class="btn">Cancel</a>
+</form>
