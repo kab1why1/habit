@@ -1,6 +1,14 @@
 <div class="container">
   <h1>Create a New Habit</h1>
 
+  <% if (locals.errors && locals.errors.length) { %>
+    <ul class="errors">
+      <% locals.errors.forEach(e => { %>
+        <li style="color:red"><%= e %></li>
+      <% }) %>
+    </ul>
+  <% } %>
+
   <form action="/habits/new" method="POST" style="margin-top:20px;">
     <label>Title:</label>
     <input type="text" name="title" required>
@@ -11,9 +19,20 @@
     <label>Category:</label>
     <input type="text" name="category" placeholder="e.g. Health, Study, Fitness">
 
-    <label>Color (hex or css color):</label>
-    <input type="text" name="color" placeholder="#5b4ef5">
+    <label>Color:</label>
+    <select name="color">
+      <option value="#5b4ef5">Purple</option>
+      <option value="#ef4444">Red</option>
+      <option value="#10b981">Green</option>
+      <option value="#f59e0b">Orange</option>
+      <option value="#3b82f6">Blue</option>
+      <option value="#8b5cf6">Violet</option>
+      <option value="#ef6c00">Amber</option>
+    </select>
 
-    <button class="btn" type="submit">Create Habit</button>
+    <div style="margin-top:12px;">
+      <button class="btn" type="submit">Create Habit</button>
+      <a href="/" class="btn" style="margin-left:8px;">Cancel</a>
+    </div>
   </form>
 </div>

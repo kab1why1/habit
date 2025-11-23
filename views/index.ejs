@@ -26,7 +26,7 @@
   <section class="week">
     <h2>This Week</h2>
     <div class="week-days">
-      <!-- static for now, can be generated later -->
+      <!-- Future dynamic generation -->
     </div>
   </section>
 
@@ -36,14 +36,12 @@
       <h3>Welcome — please <a href="/register">register</a> or <a href="/login">login</a> to manage habits</h3>
 
     <% } else if (habits.length === 0) { %>
-
       <div class="empty-icon">🎯</div>
       <h3>No habits yet</h3>
       <p>Create your first habit to start your journey</p>
       <a href="/habits/new" class="create-btn">+ Create Your First Habit</a>
 
     <% } else { %>
-
       <div class="habit-list">
         <% habits.forEach(h => { 
              const color = h.color || '#5b4ef5';
@@ -72,7 +70,6 @@
           </div>
         <% }) %>
       </div>
-
     <% } %>
   </section>
 </main>
