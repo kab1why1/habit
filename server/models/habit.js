@@ -1,88 +1,38 @@
-// server/models/habit.js
-const db = require('../config/db');
+const { pool } = require('../config/db');
 
-// Create table
-async function createHabitsTable() {
-  const query = `
-    CREATE TABLE IF NOT EXISTS habits (
-      id SERIAL PRIMARY KEY,
-      title VARCHAR(255) NOT NULL,
-      description TEXT,
-      category VARCHAR(100),
-      color VARCHAR(20),
-      completed BOOLEAN DEFAULT false,
-      user_id INTEGER REFERENCES users(id),
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-  `;
-  await db.query(query);
-}
-
-// Create
-async function createHabit({ title, description, category, color, user_id }) {
-  const query = `
-    INSERT INTO habits (title, description, category, color, user_id)
-    VALUES ($1, $2, $3, $4, $5)
-    RETURNING *
-  `;
-  const values = [title, description, category, color, user_id];
-  const { rows } = await db.query(query, values);
-  return rows[0];
-}
-
-// Read all habits for user (or all if userId null)
-async function getAllHabits(userId = null) {
-  let query = 'SELECT * FROM habits';
-  let values = [];
-  if (userId) {
-    query += ' WHERE user_id=$1 ORDER BY created_at DESC';
-    values = [userId];
-  } else {
-    query += ' ORDER BY created_at DESC';
+// Get all habits for a user
+async function getAllHabits(userId) {
+  try {
+    const res = await pool.query('SELECT * FROM habits WHERE user_id=$1 ORDER BY created_at DESC', [userId]);
+    return res.rows;
+  } catch (err) {
+    console.error('DB Query Error', err);
+    throw err;
   }
-  const { rows } = await db.query(query, values);
-  return rows;
 }
 
-// Get by id
-async function getHabitById(id) {
-  const { rows } = await db.query('SELECT * FROM habits WHERE id=$1', [id]);
-  return rows[0];
+// Get habit by id for a user
+async function getHabitById(id, userId) {
+  try {
+    const res = await pool.query('SELECT * FROM habits WHERE id=$1 AND user_id=$2', [id, userId]);
+    return res.rows[0];
+  } catch (err) {
+    console.error('Get habit error', err);
+    throw err;
+  }
 }
 
-// Update
-async function updateHabit(id, { title, description, category, color }) {
-  const query = `
-    UPDATE habits
-    SET title=$1, description=$2, category=$3, color=$4
-    WHERE id=$5
-    RETURNING *
-  `;
-  const values = [title, description, category, color, id];
-  const { rows } = await db.query(query, values);
-  return rows[0];
+// Toggle habit completed
+async function toggleHabit(id, userId) {
+  try {
+    await pool.query(
+      'UPDATE habits SET completed = NOT completed WHERE id=$1 AND user_id=$2',
+      [id, userId]
+    );
+  } catch (err) {
+    console.error('Toggle habit error', err);
+    throw err;
+  }
 }
 
-// Delete
-async function deleteHabit(id) {
-  await db.query('DELETE FROM habits WHERE id=$1', [id]);
-}
-
-// Toggle completed
-async function toggleHabitCompleted(id) {
-  const habit = await getHabitById(id);
-  if (!habit) return null;
-  const query = 'UPDATE habits SET completed=$1 WHERE id=$2 RETURNING *';
-  const { rows } = await db.query(query, [!habit.completed, id]);
-  return rows[0];
-}
-
-module.exports = {
-  createHabitsTable,
-  createHabit,
-  getAllHabits,
-  getHabitById,
-  updateHabit,
-  deleteHabit,
-  toggleHabitCompleted,
-};
+module.exports = { getAllHabits, getHabitById, toggleHabit };
