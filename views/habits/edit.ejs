@@ -1,26 +1,43 @@
-<% const habit = locals.habit; %>
+<main class="habit-page">
+  <h2>Edit Habit</h2>
 
-<main>
-  <div class="container">
-    <h2>Edit Habit</h2>
+  <% if (!habit) { %>
+    <p>Habit not found</p>
+    <a href="/" class="btn btn-secondary">Back</a>
+  <% } else { %>
+    <% if (locals && locals.errors && locals.errors.length) { %>
+      <ul class="errors">
+        <% locals.errors.forEach(err => { %>
+          <li style="color:red;"><%= err %></li>
+        <% }); %>
+      </ul>
+    <% } %>
 
-    <form action="/habits/<%= habit.id %>/edit" method="POST" style="margin-top:14px;">
-      <label>Title</label>
-      <input type="text" name="title" value="<%= habit.title %>" required>
+    <form action="/habits/<%= habit.id %>/edit" method="POST">
+      <label for="title">Habit Title</label>
+      <input type="text" name="title" id="title" value="<%= habit.title %>" required>
 
-      <label>Description</label>
-      <textarea name="description"><%= habit.description || '' %></textarea>
+      <label for="description">Description</label>
+      <textarea name="description" id="description"><%= habit.description %></textarea>
 
-      <label>Category</label>
-      <input type="text" name="category" value="<%= habit.category || '' %>">
+      <label for="category">Category</label>
+      <select name="category" id="category" required>
+        <% const categories = ['General','Health','Work','Learning','Fitness']; %>
+        <% categories.forEach(c => { %>
+          <option value="<%= c %>" <%= habit.category === c ? 'selected' : '' %>><%= c %></option>
+        <% }) %>
+      </select>
 
-      <label>Color</label>
-      <input type="text" name="color" value="<%= habit.color || '' %>">
+      <label for="color">Color</label>
+      <select name="color" id="color" required>
+        <% const colors = { '#5b4ef5':'Purple', '#ff6b6b':'Red', '#4caf50':'Green', '#ffb74d':'Orange', '#03a9f4':'Blue' }; %>
+        <% Object.entries(colors).forEach(([val,name]) => { %>
+          <option value="<%= val %>" <%= habit.color === val ? 'selected' : '' %>><%= name %></option>
+        <% }) %>
+      </select>
 
-      <div style="margin-top:12px;">
-        <button class="btn" type="submit">Save</button>
-        <a href="/habits/<%= habit.id %>" class="btn">Cancel</a>
-      </div>
+      <button type="submit" class="btn btn-primary">Save Changes</button>
+      <a href="/" class="btn btn-secondary">Cancel</a>
     </form>
-  </div>
+  <% } %>
 </main>

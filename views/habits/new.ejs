@@ -1,25 +1,40 @@
-<main class="form-page">
+<main class="habit-page">
   <h2>Create New Habit</h2>
 
-  <% if (locals.errors && locals.errors.length) { %>
+  <% if (locals && locals.errors && locals.errors.length) { %>
     <ul class="errors">
-      <% locals.errors.forEach(e => { %><li><%= e %></li><% }) %>
+      <% locals.errors.forEach(err => { %>
+        <li style="color:red;"><%= err %></li>
+      <% }); %>
     </ul>
   <% } %>
 
   <form action="/habits/new" method="POST">
-    <label>Title</label>
-    <input type="text" name="title" required>
+    <label for="title">Habit Title</label>
+    <input type="text" name="title" id="title" required>
 
-    <label>Description</label>
-    <textarea name="description"></textarea>
+    <label for="description">Description</label>
+    <textarea name="description" id="description"></textarea>
 
-    <label>Category</label>
-    <input type="text" name="category" placeholder="e.g. Health, Study">
+    <label for="category">Category</label>
+    <select name="category" id="category" required>
+      <option value="General">General</option>
+      <option value="Health">Health</option>
+      <option value="Work">Work</option>
+      <option value="Learning">Learning</option>
+      <option value="Fitness">Fitness</option>
+    </select>
 
-    <label>Color (hex or name)</label>
-    <input type="text" name="color" placeholder="#ff7b7b">
+    <label for="color">Color</label>
+    <select name="color" id="color" required>
+      <option value="#5b4ef5">Purple</option>
+      <option value="#ff6b6b">Red</option>
+      <option value="#4caf50">Green</option>
+      <option value="#ffb74d">Orange</option>
+      <option value="#03a9f4">Blue</option>
+    </select>
 
     <button type="submit" class="btn btn-primary">Create Habit</button>
+    <a href="/" class="btn btn-secondary">Cancel</a>
   </form>
 </main>
