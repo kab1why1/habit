@@ -1,127 +1,137 @@
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcrypt');
-
-const { createUser, findByUsername, getUserById } = require('../models/user');
-const {
-  createHabit,
-  getAllHabits,
-  getHabitById,
-  toggleHabitCompleted,
-} = require('../models/habit');
+const { getAllHabits, getHabitById, createHabit, updateHabit, toggleHabitCompleted } = require('../models/habit');
+const { getUserByUsername, createUser } = require('../models/user');
 
 // Home page
 router.get('/', async (req, res) => {
-  const habits = req.session.user ? await getAllHabits(req.session.user.id) : [];
-  res.render('index', { habits, user: req.session.user });
+  const habits = req.user ? await getAllHabits(req.user.id) : [];
+  res.render('index', { habits, user: req.user });
 });
 
-// Register
-router.get('/register', (req, res) => res.render('registration'));
-router.post('/register', async (req, res) => {
-  const { username, password, role } = req.body;
-  const errors = [];
-
-  if (!username || !password) errors.push('Username and password are required');
-
-  const existingUser = await findByUsername(username);
-  if (existingUser) errors.push('Username already exists');
-
-  if (errors.length > 0) return res.render('registration', { errors });
-
-  await createUser(username, password, role || 'user');
-  res.redirect('/login');
+// Habits routes
+router.get('/habits/manage', async (req, res) => {
+  const habits = req.user ? await getAllHabits(req.user.id) : [];
+  res.render('habits/manage', { habits, user: req.user });
 });
 
-// Login
-router.get('/login', (req, res) => res.render('login'));
+router.get('/habits/new', (req, res) => {
+  res.render('habits/new', { errors: [], user: req.user });
+});
+
+router.post('/habits/new', async (req, res) => {
+  const { title, description, category, color } = req.body;
+  try {
+    await createHabit({ user_id: req.user.id, title, description, category, color });
+    res.redirect('/habits/manage');
+  } catch (err) {
+    console.error(err);
+    res.render('habits/new', { errors: [err.message], user: req.user });
+  }
+});
+
+router.get('/habits/:id', async (req, res) => {
+  try {
+    const habit = await getHabitById(req.params.id);
+    res.render('habit', { habit, user: req.user });
+  } catch (err) {
+    console.error(err);
+    res.render('habit', { habit: null, user: req.user });
+  }
+});
+
+router.get('/habits/:id/edit', async (req, res) => {
+  try {
+    const habit = await getHabitById(req.params.id);
+    res.render('habits/edit', { habit, user: req.user });
+  } catch (err) {
+    console.error(err);
+    res.redirect('/habits/manage');
+  }
+});
+
+router.post('/habits/:id/edit', async (req, res) => {
+  try {
+    const { title, description, category, color } = req.body;
+    await updateHabit(req.params.id, { title, description, category, color });
+    res.redirect(`/habits/${req.params.id}`);
+  } catch (err) {
+    console.error(err);
+    res.redirect('/habits/manage');
+  }
+});
+
+router.post('/habits/:id/toggle', async (req, res) => {
+  try {
+    await toggleHabitCompleted(req.params.id);
+    res.redirect('back');
+  } catch (err) {
+    console.error('Toggle habit error', err);
+    res.redirect('/habits/manage');
+  }
+});
+
+// Login & registration
+router.get('/login', (req, res) => res.render('login', { errors: [], user: req.user }));
 router.post('/login', async (req, res) => {
-  const { username, password } = req.body;
-  const errors = [];
+  try {
+    const { username, password } = req.body;
+    const user = await getUserByUsername(username);
+    if (!user) return res.render('login', { errors: ['User not found'], user: req.user });
 
-  const user = await findByUsername(username);
-  if (!user) errors.push('Invalid username or password');
+    const bcrypt = require('bcrypt');
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.render('login', { errors: ['Invalid password'], user: req.user });
 
-  if (user && !(await bcrypt.compare(password, user.password)))
-    errors.push('Invalid username or password');
-
-  if (errors.length > 0) return res.render('login', { errors });
-
-  req.session.user = { id: user.id, username: user.username, role: user.role };
-  res.redirect('/');
+    req.session.userId = user.id;
+    res.redirect('/');
+  } catch (err) {
+    console.error('Login error', err);
+    res.render('login', { errors: [err.message], user: req.user });
+  }
 });
 
-// Logout
+router.get('/register', (req, res) => res.render('registration', { errors: [], user: req.user }));
+router.post('/register', async (req, res) => {
+  try {
+    const { username, password, role } = req.body;
+    await createUser({ username, password, role });
+    res.redirect('/login');
+  } catch (err) {
+    console.error('Registration error', err);
+    res.render('registration', { errors: [err.message], user: req.user });
+  }
+});
+
 router.get('/logout', (req, res) => {
   req.session.destroy(() => res.redirect('/'));
 });
 
-// Profile
-router.get('/profile', (req, res) => {
-  if (!req.session.user) return res.redirect('/login');
-  res.render('profile', { user: req.session.user });
+router.get('/profile', async (req, res) => {
+  res.render('profile', { user: req.user, error: null });
 });
+
 router.post('/profile', async (req, res) => {
-  if (!req.session.user) return res.redirect('/login');
+  try {
+    const { username, password } = req.body;
+    const bcrypt = require('bcrypt');
 
-  const { username, password } = req.body;
-  const user = await getUserById(req.session.user.id);
-  const errors = [];
+    let hashedPassword = undefined;
+    if (password) hashedPassword = await bcrypt.hash(password, 10);
 
-  if (!username) errors.push('Username cannot be empty');
+    const query = `
+      UPDATE users
+      SET username = $1 ${hashedPassword ? ', password = $2' : ''}
+      WHERE id = $3
+    `;
 
-  if (errors.length > 0) return res.render('profile', { user, error: errors[0] });
-
-  let hashedPassword = user.password;
-  if (password) hashedPassword = await bcrypt.hash(password, 10);
-
-  await user.update({ username, password: hashedPassword });
-  req.session.user.username = username;
-
-  res.redirect('/profile');
-});
-
-// Manage habits
-router.get('/habits/manage', async (req, res) => {
-  if (!req.session.user) return res.redirect('/login');
-  const habits = await getAllHabits(req.session.user.id);
-  res.render('habits/manage', { habits });
-});
-
-// Create habit
-router.get('/habits/new', (req, res) => res.render('habits/new'));
-router.post('/habits/new', async (req, res) => {
-  if (!req.session.user) return res.redirect('/login');
-  const { title, description, category, color } = req.body;
-  const errors = [];
-  if (!title) errors.push('Title is required');
-  if (errors.length > 0) return res.render('habits/new', { errors });
-  await createHabit({ title, description, category, color, user_id: req.session.user.id });
-  res.redirect('/habits/manage');
-});
-
-// Edit habit
-router.get('/habits/:id/edit', async (req, res) => {
-  const habit = await getHabitById(req.params.id);
-  res.render('habits/edit', { habit });
-});
-router.post('/habits/:id/edit', async (req, res) => {
-  const habit = await getHabitById(req.params.id);
-  const { title, description, category, color } = req.body;
-  await habit.update({ title, description, category, color });
-  res.redirect(`/habits/${habit.id}`);
-});
-
-// Toggle habit completed
-router.post('/habits/:id/toggle', async (req, res) => {
-  await toggleHabitCompleted(req.params.id);
-  res.redirect('back');
-});
-
-// Show single habit
-router.get('/habits/:id', async (req, res) => {
-  const habit = await getHabitById(req.params.id);
-  res.render('habit', { habit });
+    const values = hashedPassword ? [username, hashedPassword, req.user.id] : [username, req.user.id];
+    await require('../config/db').pool.query(query, values);
+    res.redirect('/');
+  } catch (err) {
+    console.error('Profile update error', err);
+    res.render('profile', { user: req.user, error: err.message });
+  }
 });
 
 module.exports = router;
