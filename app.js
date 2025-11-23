@@ -3,8 +3,8 @@ const express = require('express');
 const expressLayout = require('express-ejs-layouts');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
+const { pool, testConnection } = require('./server/config/db');
 
-const { testConnection, pool } = require('./server/config/db');
 const mainRoutes = require('./server/routes/main');
 const adminRoutes = require('./server/routes/admin');
 const setUser = require('./server/middleware/setUser');
@@ -24,7 +24,7 @@ app.use(
     secret: process.env.SESSION_SECRET || 'secret',
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 1000 * 60 * 60 * 24 }, // 1 day
+    cookie: { maxAge: 1000 * 60 * 60 * 24 },
   })
 );
 
