@@ -1,26 +1,317 @@
-<main class="auth-page">
-  <h2>Register</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - HabitFlow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  <% if (locals && locals.errors && locals.errors.length) { %>
-    <ul class="errors">
-      <% locals.errors.forEach(err => { %>
-        <li style="color:red;"><%= err %></li>
-      <% }); %>
-    </ul>
-  <% } %>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #e5e5e5;
+        }
 
-  <form action="/register" method="POST">
-    <input type="text" name="username" placeholder="Username" required />
-    <input type="password" name="password" placeholder="Password" required />
+        .auth-container {
+            width: 100%;
+            max-width: 420px;
+        }
 
-    <label for="role">Register as</label>
-    <select name="role" id="role">
-      <option value="user" selected>Regular user</option>
-      <option value="admin">Admin</option>
-    </select>
+        .auth-page {
+            background: #141414;
+            padding: 40px;
+            border-radius: 8px;
+            border: 1px solid #222;
+        }
 
-    <button type="submit" class="btn btn-primary">Register</button>
-  </form>
+        .logo-section {
+            text-align: center;
+            margin-bottom: 32px;
+        }
 
-  <p>Already have an account? <a href="/login">Login here</a></p>
-</main>
+        .logo-section h1 {
+            font-size: 32px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-section p {
+            font-size: 14px;
+            color: #6b6b6b;
+        }
+
+        h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 14px;
+            color: #6b6b6b;
+            margin-bottom: 24px;
+        }
+
+        /* Errors */
+        .errors {
+            background: #2a1515;
+            border: 1px solid #dc2626;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 24px;
+            list-style: none;
+        }
+
+        .errors li {
+            color: #fca5a5;
+            font-size: 14px;
+            padding: 4px 0;
+        }
+
+        .errors li:before {
+            content: "⚠ ";
+            margin-right: 8px;
+        }
+
+        /* Form */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #e5e5e5;
+        }
+
+        .label-hint {
+            font-size: 12px;
+            color: #6b6b6b;
+            font-weight: 400;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 14px 16px;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #e5e5e5;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #fff;
+            background: #111;
+        }
+
+        input::placeholder {
+            color: #555;
+        }
+
+        /* Select */
+        select {
+            appearance: none;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23e5e5e5' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            padding-right: 48px;
+        }
+
+        /* Password toggle */
+        .password-field {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6b6b6b;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 4px 8px;
+        }
+
+        .password-toggle:hover {
+            color: #e5e5e5;
+        }
+
+        /* Strength indicator */
+        .password-strength {
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .password-strength.weak {
+            display: block;
+            color: #dc2626;
+        }
+
+        .password-strength.medium {
+            display: block;
+            color: #f59e0b;
+        }
+
+        .password-strength.strong {
+            display: block;
+            color: #22c55e;
+        }
+
+        /* Role info */
+        .info-box {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 13px;
+            color: #6b6b6b;
+            margin-top: 4px;
+        }
+        .info-box strong {
+            color: #e5e5e5;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            background: #fff;
+            color: #0a0a0a;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.2s ease;
+        }
+
+        .btn:hover {
+            background: #e5e5e5;
+            transform: translateY(-1px);
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #222;
+        }
+
+        .auth-footer a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="logo-section">
+            <h1>HabitFlow</h1>
+            <p>Track your habits, build your future</p>
+        </div>
+
+        <main class="auth-page">
+            <h2>Create Account</h2>
+            <p class="subtitle">Join HabitFlow and start building better habits</p>
+
+            <% if (locals && locals.errors && locals.errors.length) { %>
+                <ul class="errors">
+                    <% locals.errors.forEach(err => { %>
+                        <li><%= err %></li>
+                    <% }) %>
+                </ul>
+            <% } %>
+
+            <form action="/register" method="POST">
+                <input type="text" name="username" placeholder="Choose a username" required />
+
+                <div class="password-field">
+                    <input type="password" name="password" id="password" placeholder="Create a password" required />
+                    <button type="button" class="password-toggle" onclick="togglePassword()">Show</button>
+                </div>
+                <div class="password-strength" id="passwordStrength"></div>
+
+                <label for="role">
+                    Register as
+                    <span class="label-hint">Choose your account type</span>
+                </label>
+
+                <select name="role" id="role">
+                    <option value="user" selected>Regular User</option>
+                    <option value="admin">Admin</option>
+                </select>
+
+                <div class="info-box" id="roleInfo">
+                    <strong>Regular User:</strong> Track and manage your personal habits
+                </div>
+
+                <button type="submit" class="btn">Create Account</button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Already have an account? <a href="/login">Login here</a></p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const input = document.getElementById('password');
+            const btn = document.querySelector('.password-toggle');
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = 'Hide';
+            } else {
+                input.type = 'password';
+                btn.textContent = 'Show';
+            }
+        }
+        
+        // Role info
+        const role = document.getElementById("role");
+        const roleInfo = document.getElementById("roleInfo");
+
+        role.addEventListener("change", () => {
+            if (role.value === "user") {
+                roleInfo.innerHTML = "<strong>Regular User:</strong> Track and manage your personal habits";
+            } else {
+                roleInfo.innerHTML = "<strong>Admin:</strong> Full access to manage users and system settings";
+            }
+        });
+    </script>
+</body>
+</html>

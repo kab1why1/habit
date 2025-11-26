@@ -1,40 +1,352 @@
-<main class="habit-page">
-  <h2>Create New Habit</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Habit - HabitFlow</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
 
-  <% if (locals && locals.errors && locals.errors.length) { %>
-    <ul class="errors">
-      <% locals.errors.forEach(err => { %>
-        <li style="color:red;"><%= err %></li>
-      <% }); %>
-    </ul>
-  <% } %>
+        body {
+            font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+            background:#0a0a0a;
+            min-height:100vh;
+            padding:20px;
+            color:#e5e5e5;
+        }
 
-  <form action="/habits/new" method="POST">
-    <label for="title">Habit Title</label>
-    <input type="text" name="title" id="title" required>
+        .container { max-width:700px; margin:0 auto; }
 
-    <label for="description">Description</label>
-    <textarea name="description" id="description"></textarea>
+        .habit-page {
+            background:#141414;
+            padding:40px;
+            border-radius:8px;
+            border:1px solid #222;
+        }
 
-    <label for="category">Category</label>
-    <select name="category" id="category" required>
-      <option value="General">General</option>
-      <option value="Health">Health</option>
-      <option value="Work">Work</option>
-      <option value="Learning">Learning</option>
-      <option value="Fitness">Fitness</option>
-    </select>
+        h2 {
+            font-size:28px;
+            font-weight:600;
+            color:#fff;
+            margin-bottom:8px;
+            letter-spacing:-0.5px;
+        }
 
-    <label for="color">Color</label>
-    <select name="color" id="color" required>
-      <option value="#5b4ef5">Purple</option>
-      <option value="#ff6b6b">Red</option>
-      <option value="#4caf50">Green</option>
-      <option value="#ffb74d">Orange</option>
-      <option value="#03a9f4">Blue</option>
-    </select>
+        .page-subtitle {
+            color:#6b6b6b;
+            font-size:14px;
+            margin-bottom:32px;
+        }
 
-    <button type="submit" class="btn btn-primary">Create Habit</button>
-    <a href="/" class="btn btn-secondary">Cancel</a>
-  </form>
-</main>
+        /* Errors */
+        .errors {
+            background:#2a1515;
+            border:1px solid #dc2626;
+            border-radius:6px;
+            padding:16px;
+            margin-bottom:24px;
+            list-style:none;
+        }
+        .errors li {
+            color:#fca5a5;
+            font-size:14px;
+            padding:4px 0;
+        }
+        .errors li:before { content:"⚠ "; margin-right:8px; }
+
+        /* Form */
+        form { display:flex; flex-direction:column; gap:24px; }
+
+        .form-group { display:flex; flex-direction:column; gap:8px; }
+
+        label { font-size:14px; font-weight:500; color:#e5e5e5; }
+
+        .label-hint { font-size:12px; color:#6b6b6b; margin-top:-4px; }
+
+        input[type="text"],
+        textarea,
+        select {
+            width:100%;
+            padding:12px 16px;
+            background:#0a0a0a;
+            border:1px solid #333;
+            border-radius:6px;
+            color:#e5e5e5;
+            font-size:14px;
+            transition:0.2s;
+            font-family:inherit;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            outline:none;
+            border-color:#fff;
+            background:#111;
+        }
+
+        textarea {
+            min-height:120px;
+            resize:vertical;
+            line-height:1.6;
+        }
+
+        select {
+            cursor:pointer;
+            appearance:none;
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23e5e5e5' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat:no-repeat;
+            background-position:right 16px center;
+            padding-right:48px;
+        }
+
+        /* Color Selector */
+        .color-selector { display:flex; gap:12px; align-items:center; }
+
+        .color-preview {
+            width:48px;
+            height:48px;
+            border-radius:6px;
+            border:2px solid #333;
+            transition:0.2s;
+            flex-shrink:0;
+        }
+
+        .color-options {
+            display:flex;
+            gap:8px;
+            margin-top:8px;
+        }
+
+        .color-option {
+            width:36px;
+            height:36px;
+            border-radius:6px;
+            border:2px solid #333;
+            cursor:pointer;
+            transition:0.2s;
+        }
+
+        .color-option:hover {
+            transform:scale(1.1);
+            border-color:#555;
+        }
+
+        .color-option.selected {
+            border-color:#fff;
+            box-shadow:0 0 0 2px #333;
+        }
+
+        .form-actions {
+            display:flex;
+            gap:12px;
+            margin-top:8px;
+            padding-top:24px;
+            border-top:1px solid #222;
+        }
+
+        .btn {
+            padding:12px 28px;
+            border-radius:6px;
+            font-size:14px;
+            font-weight:500;
+            border:1px solid transparent;
+            cursor:pointer;
+            transition:0.2s;
+            text-align:center;
+            text-decoration:none;
+        }
+
+        .btn-primary {
+            background:#fff;
+            color:#0a0a0a;
+            border-color:#fff;
+            flex:1;
+        }
+
+        .btn-primary:hover {
+            background:#e5e5e5;
+            transform:translateY(-1px);
+        }
+
+        .btn-secondary {
+            background:transparent;
+            color:#e5e5e5;
+            border:1px solid #333;
+        }
+
+        .btn-secondary:hover {
+            border-color:#555;
+            background:#1a1a1a;
+        }
+
+        .tips {
+            background:#0a0a0a;
+            border:1px solid #222;
+            border-radius:6px;
+            padding:16px;
+            margin-top:24px;
+        }
+
+        .tips h4 {
+            font-size:13px;
+            color:#fff;
+            margin-bottom:8px;
+        }
+
+        .tips li {
+            font-size:13px;
+            color:#6b6b6b;
+            padding:4px 0 4px 18px;
+            position:relative;
+        }
+
+        .tips li:before {
+            content:"•";
+            position:absolute;
+            left:4px;
+            color:#fff;
+        }
+
+        @media (max-width:768px) {
+            .habit-page { padding:28px 24px; }
+            h2 { font-size:24px; }
+            .form-actions { flex-direction:column; }
+            .btn { width:100%; }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <main class="habit-page">
+        <h2>Create New Habit</h2>
+        <p class="page-subtitle">Build a new habit to improve your daily routine</p>
+
+        <% if (locals && locals.errors && locals.errors.length) { %>
+            <ul class="errors">
+                <% locals.errors.forEach(err => { %>
+                    <li><%= err %></li>
+                <% }) %>
+            </ul>
+        <% } %>
+
+        <form action="/habits/new" method="POST" id="habitForm">
+            <!-- Title -->
+            <div class="form-group">
+                <label for="title">
+                    Habit Title
+                    <div class="label-hint">What do you want to accomplish?</div>
+                </label>
+                <input type="text" name="title" id="title" required 
+                       placeholder="e.g., Morning meditation, Read 30 pages, Exercise"
+                       value="<%= locals.oldInputs?.title || '' %>">
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+                <label for="description">
+                    Description
+                    <div class="label-hint">Optional — why this habit matters</div>
+                </label>
+                <textarea name="description" id="description"
+                          placeholder="Add details about your habit, your goals, or why you want to build this habit..."><%= locals.oldInputs?.description || '' %></textarea>
+            </div>
+
+            <!-- Category -->
+            <div class="form-group">
+                <label for="category">
+                    Category
+                    <div class="label-hint">Choose the area this habit belongs to</div>
+                </label>
+                <select name="category" id="category" required>
+                    <% const categories = ['General','Health','Work','Learning','Fitness']; %>
+                    <% categories.forEach(c => { %>
+                        <option value="<%= c %>" 
+                                <%= (locals.oldInputs?.category === c) ? 'selected' : '' %>><%= c %></option>
+                    <% }) %>
+                </select>
+            </div>
+
+            <!-- Color -->
+            <div class="form-group">
+                <label for="color">
+                    Color
+                    <div class="label-hint">Pick a color for this habit</div>
+                </label>
+
+                <div class="color-selector">
+
+                    <select name="color" id="colorSelect" required>
+                        <% const colorMap = {
+                            '#5b4ef5': 'Purple',
+                            '#ff6b6b': 'Red',
+                            '#4caf50': 'Green',
+                            '#ffb74d': 'Orange',
+                            '#03a9f4': 'Blue'
+                        }; %>
+
+                        <% Object.entries(colorMap).forEach(([hex, name]) => { %>
+                            <option value="<%= hex %>" 
+                                    <%= (locals.oldInputs?.color === hex) ? 'selected' : '' %>>
+                                <%= name %>
+                            </option>
+                        <% }) %>
+                    </select>
+                </div>
+
+                <div class="color-options">
+                    <% Object.keys(colorMap).forEach(hex => { %>
+                        <div class="color-option <%= (locals.oldInputs?.color === hex) ? 'selected' : '' %>"
+                             data-color="<%= hex %>" 
+                             ></div>
+                    <% }) %>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Create Habit</button>
+                <a href="/" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+
+        <div class="tips">
+            <h4>💡 Tips for creating great habits</h4>
+            <ul>
+                <li>Be specific: “30 minutes of cardio” instead of “exercise more”</li>
+                <li>Start small: build consistency first</li>
+                <li>Choose realistic goals you can maintain</li>
+                <li>Track progress daily to stay motivated</li>
+            </ul>
+        </div>
+    </main>
+</div>
+
+<script>
+    const colorSelect = document.getElementById("colorSelect");
+    const colorPreview = document.getElementById("colorPreview");
+    const colorOptions = document.querySelectorAll(".color-option");
+
+    function updateColors(color) {
+        colorPreview.style.backgroundColor = color;
+        colorOptions.forEach(opt => {
+            opt.classList.toggle("selected", opt.dataset.color === color);
+        });
+    }
+
+    colorSelect.addEventListener("change", () => {
+        updateColors(colorSelect.value);
+    });
+
+    colorOptions.forEach(opt => {
+        opt.addEventListener("click", () => {
+            const color = opt.dataset.color;
+            colorSelect.value = color;
+            updateColors(color);
+        });
+    });
+</script>
+
+</body>
+</html>
