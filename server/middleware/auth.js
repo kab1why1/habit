@@ -1,8 +1,12 @@
 function ensureLoggedIn(req, res, next) {
-  if (req.session.user) {
+  // Check for userId (which we set in login/register)
+  if (req.session.userId) {
     next();
   } else {
-    res.redirect('/login');
+    // If no ID in session, they aren't logged in
+    req.session.destroy(() => {
+        res.redirect('/login');
+    });
   }
 }
 

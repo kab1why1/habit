@@ -1,11 +1,301 @@
-<main>
-  <h2>Your profile</h2>
-  <% if (locals.error) { %><p style="color:red"><%= locals.error %></p><% } %>
-  <form action="/profile" method="POST">
-    <label>Username</label>
-    <input name="username" value="<%= locals.user.username %>" required>
-    <label>New password (leave empty to keep)</label>
-    <input name="password" type="password">
-    <button type="submit" class="btn btn-primary">Save</button>
-  </form>
-</main>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Profile - HabitFlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-body: #050505;
+            --bg-card: #0f0f0f;
+            --bg-hover: #1a1a1a;
+            --bg-input: #18181b;
+            --border: #27272a;
+            --text-main: #ededed;
+            --text-muted: #a1a1aa;
+            --primary: #6366f1;
+            
+            /* Gradients */
+            --accent-gradient: linear-gradient(135deg, #6366f1, #a855f7);
+            --card-gradient: linear-gradient(180deg, #18181b 0%, #0f0f0f 100%);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            margin: 0; padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+
+        /* Back Link */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 24px;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: #fff; }
+
+        /* Profile Header Card */
+        .profile-header {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        /* Glow effect behind avatar */
+        .profile-header::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: 50%;
+            transform: translateX(-50%);
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, rgba(0,0,0,0) 70%);
+            pointer-events: none;
+        }
+
+        .avatar {
+            width: 96px; height: 96px;
+            background: var(--bg-hover);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 42px;
+            margin: 0 auto 16px;
+            border: 4px solid var(--bg-card);
+            box-shadow: 0 0 0 1px var(--border), 0 10px 20px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 { margin: 0; font-size: 32px; font-weight: 800; letter-spacing: -1px; color: #fff; position: relative; z-index: 1; }
+        .join-date { color: var(--text-muted); font-size: 13px; margin-top: 8px; font-weight: 500; position: relative; z-index: 1; }
+
+        /* Level Bar */
+        .level-container { margin: 32px auto 0; max-width: 400px; text-align: left; position: relative; z-index: 1; }
+        
+        .level-info {
+            display: flex; justify-content: space-between;
+            font-size: 13px; font-weight: 600;
+            margin-bottom: 8px; color: var(--text-muted);
+        }
+        .level-info span:first-child { color: #fff; }
+
+        .progress-bg {
+            height: 8px; background: #27272a; border-radius: 10px; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--accent-gradient);
+            border-radius: 10px;
+            box-shadow: 0 0 12px rgba(139, 92, 246, 0.5);
+            transition: width 0.5s ease;
+        }
+        
+        .xp-remaining { text-align: right; font-size: 11px; color: #52525b; margin-top: 6px; font-weight: 500; }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 600px) { .stats-grid { grid-template-columns: 1fr; } }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: transform 0.2s;
+        }
+        .stat-card:hover { border-color: #3f3f46; transform: translateY(-2px); }
+
+        .stat-val { font-size: 28px; font-weight: 800; color: #fff; display: block; letter-spacing: -0.5px; }
+        .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-top: 4px; }
+
+        /* Badges Section */
+        .section-header {
+            display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+            padding-bottom: 16px; border-bottom: 1px solid var(--border);
+        }
+        .section-header h3 { margin: 0; font-size: 18px; font-weight: 700; color: #fff; }
+        .badge-count { background: var(--bg-hover); padding: 2px 8px; border-radius: 100px; font-size: 12px; color: var(--text-muted); }
+
+        .badge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        .badge-card {
+            background: var(--card-gradient);
+            padding: 20px 12px;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: default;
+        }
+
+        .badge-card:hover {
+            transform: translateY(-4px);
+            border-color: #6366f1;
+            box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.2);
+        }
+
+        .badge-icon { font-size: 36px; margin-bottom: 12px; display: block; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3)); }
+        .badge-name { font-size: 12px; font-weight: 700; color: #fff; display: block; margin-bottom: 4px; }
+        .badge-desc { font-size: 10px; color: var(--text-muted); display: block; line-height: 1.3; }
+
+        /* Edit Form */
+        .edit-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px;
+        }
+
+        form { display: flex; flex-direction: column; gap: 20px; }
+        
+        label {
+            font-size: 13px; font-weight: 600; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%; padding: 14px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: #fff;
+            font-family: inherit; font-size: 15px;
+            transition: all 0.2s ease; outline: none;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            background: #27272a;
+        }
+
+        .btn {
+            padding: 14px;
+            background: #fff; color: #000;
+            border: none; border-radius: 12px;
+            cursor: pointer; font-weight: 600; font-size: 14px;
+            transition: transform 0.2s;
+            margin-top: 10px;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255,255,255,0.2); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="/" class="back-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to Dashboard
+    </a>
+    
+    <div class="profile-header">
+        <div class="avatar"><%= user.username.charAt(0).toUpperCase() %></div>
+        <h1><%= user.username %></h1>
+        <p class="join-date">Member since <%= joinDate %></p>
+
+        <div class="level-container">
+            <div class="level-info">
+                <span>Level <%= user.level %></span>
+                <span><%= user.xp %> XP</span>
+            </div>
+            <div class="progress-bg">
+                <div class="progress-fill" style="width: <%= progressPercent %>%;"></div>
+            </div>
+            <div class="xp-remaining">
+                <%= 100 - (user.xp % 100) %> XP to Level <%= user.level + 1 %>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span class="stat-val"><%= user.xp %></span>
+            <span class="stat-label">Total XP</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-val"><%= user.level %></span>
+            <span class="stat-label">Current Rank</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-val"><%= badges.length %></span>
+            <span class="stat-label">Badges Earned</span>
+        </div>
+    </div>
+
+    <div class="section-header">
+        <h3>Trophy Room</h3>
+        <span class="badge-count"><%= badges.length %> Unlocked</span>
+    </div>
+
+    <% if (badges.length === 0) { %>
+        <div style="text-align:center; padding: 40px; color: var(--text-muted); border: 1px dashed var(--border); border-radius: 16px; margin-bottom: 40px;">
+            No badges yet. Keep grinding to unlock rewards!
+        </div>
+    <% } else { %>
+        <div class="badge-grid">
+            <% badges.forEach(badge => { %>
+                <div class="badge-card">
+                    <span class="badge-icon"><%= badge.icon %></span>
+                    <span class="badge-name"><%= badge.name %></span>
+                    <span class="badge-desc"><%= badge.desc %></span>
+                </div>
+            <% }) %>
+        </div>
+    <% } %>
+
+    <div class="edit-section">
+        <div class="section-header" style="border:none; margin-bottom:10px; padding:0;">
+            <h3>Account Settings</h3>
+        </div>
+        <% if (locals.error) { %><p style="color:#ef4444; font-size:13px; margin-bottom:20px;"><%= locals.error %></p><% } %>
+        
+        <form action="/profile" method="POST">
+            <div>
+                <label>Username</label>
+                <input name="username" value="<%= user.username %>" required>
+            </div>
+            
+            <div>
+                <label>New Password <span style="font-weight:400; text-transform:none; color:#52525b;">(Leave blank to keep current)</span></label>
+                <input name="password" type="password" placeholder="••••••••">
+            </div>
+            
+            <button type="submit" class="btn">Save Changes</button>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

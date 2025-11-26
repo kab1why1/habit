@@ -1,26 +1,265 @@
-<h2>All Users</h2>
-<a href="/admin/users/new" class="btn">Create user</a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users - HabitFlow Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #050505;
+            --bg-card: #0f0f0f;
+            --bg-hover: #1a1a1a;
+            --border: #27272a;
+            --text-main: #ededed;
+            --text-muted: #a1a1aa;
+            --primary: #6366f1;
+            --danger: #ef4444;
+            --gold: #fbbf24;
+        }
 
-<table style="width:100%;margin-top:12px;border-collapse:collapse;">
-  <thead>
-    <tr style="text-align:left">
-      <th>ID</th><th>Username</th><th>Role</th><th>Created</th><th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% users.forEach(u => { %>
-      <tr>
-        <td><%= u.id %></td>
-        <td><%= u.username %></td>
-        <td><%= u.role %></td>
-        <td><%= new Date(u.created_at).toLocaleString() %></td>
-        <td>
-          <a href="/admin/users/<%= u.id %>/edit" class="btn tiny-btn">Edit</a>
-          <form action="/admin/users/<%= u.id %>/delete" method="POST" style="display:inline">
-            <button type="submit" class="btn tiny-btn delete-btn" onclick="return confirm('Delete user?')">Delete</button>
-          </form>
-        </td>
-      </tr>
-    <% }) %>
-  </tbody>
-</table>
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            margin: 0; padding: 0;
+        }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .header-title h2 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge-count {
+            background: var(--bg-hover);
+            color: var(--text-muted);
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 100px;
+            font-weight: 600;
+        }
+
+        .btn-create {
+            background: #ededed;
+            color: #000;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-create:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 4px 12px rgba(255,255,255,0.15); 
+        }
+
+        /* Table Styles */
+        .table-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        thead {
+            background: var(--bg-hover);
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            padding: 16px 24px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 16px 24px;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main);
+            vertical-align: middle;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tbody tr { transition: background 0.2s; }
+        tbody tr:hover { background: var(--bg-hover); }
+
+        /* User Column */
+        .user-cell { display: flex; align-items: center; gap: 12px; }
+        .avatar-mini {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, #334155, #475569);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 600; color: #fff;
+            border: 1px solid var(--border);
+        }
+        .username-text { font-weight: 500; }
+
+        /* Role Badges */
+        .role-badge {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 100px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .role-admin {
+            background: rgba(251, 191, 36, 0.1);
+            color: var(--gold);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+        .role-user {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        /* Actions */
+        .actions-cell { display: flex; gap: 8px; }
+        
+        .btn-icon {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        
+        .btn-icon:hover {
+            background: var(--bg-hover);
+            color: #fff;
+            border-color: #52525b;
+        }
+
+        .btn-delete:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        /* Back Link */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+        .back-link:hover { color: var(--text-main); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="/admin/dashboard" class="back-link">← Back to Dashboard</a>
+
+    <div class="page-header">
+        <div class="header-title">
+            <h2>
+                User Management
+                <span class="badge-count"><%= users.length %></span>
+            </h2>
+        </div>
+        <a href="/admin/users/new" class="btn-create">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+            Create User
+        </a>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 80px;">ID</th>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th>Joined</th>
+                    <th style="width: 100px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% users.forEach(u => { %>
+                    <tr>
+                        <td style="color: var(--text-muted);">#<%= u.id %></td>
+                        
+                        <td>
+                            <div class="user-cell">
+                                <div class="avatar-mini"><%= u.username.charAt(0).toUpperCase() %></div>
+                                <span class="username-text"><%= u.username %></span>
+                            </div>
+                        </td>
+                        
+                        <td>
+                            <% if (u.role === 'admin') { %>
+                                <span class="role-badge role-admin">Admin</span>
+                            <% } else { %>
+                                <span class="role-badge role-user">User</span>
+                            <% } %>
+                        </td>
+                        
+                        <td style="color: var(--text-muted); font-size: 13px;">
+                            <%= new Date(u.created_at).toLocaleDateString() %>
+                        </td>
+                        
+                        <td>
+                            <div class="actions-cell">
+                                <a href="/admin/users/<%= u.id %>/edit" class="btn-icon" title="Edit">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                </a>
+                                
+                                <form action="/admin/users/<%= u.id %>/delete" method="POST" style="margin:0;">
+                                    <button type="submit" class="btn-icon btn-delete" title="Delete" onclick="return confirm('Are you sure you want to delete this user?')">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>

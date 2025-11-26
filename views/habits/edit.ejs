@@ -4,104 +4,195 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Habit - HabitFlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI','Inter',sans-serif; background:#0a0a0a; min-height:100vh; padding:20px; color:#e5e5e5; }
-        .container { max-width:700px; margin:0 auto; }
-        .habit-page { background:#141414; padding:32px; border-radius:8px; border:1px solid #222; margin-bottom:20px; }
-        h2 { font-size:28px; font-weight:600; color:#fff; margin-bottom:24px; letter-spacing:-0.5px; }
-        .errors { background:#2a1515; border:1px solid #dc2626; border-radius:6px; padding:16px; margin-bottom:24px; list-style:none; }
-        .errors li { color:#fca5a5; font-size:14px; padding:4px 0; }
-        .errors li:before { content:"⚠ "; margin-right:8px; }
-        .not-found { text-align:center; padding:40px 20px; }
-        .not-found p { color:#6b6b6b; font-size:16px; margin-bottom:20px; }
-        form { display:flex; flex-direction:column; gap:20px; }
-        label { font-size:14px; font-weight:500; color:#e5e5e5; margin-bottom:8px; display:block; }
-        input[type="text"], textarea, select { width:100%; padding:12px 16px; background:#0a0a0a; border:1px solid #333; border-radius:6px; color:#e5e5e5; font-size:14px; font-family:inherit; transition: all 0.2s ease; }
-        input[type="text"]:focus, textarea:focus, select:focus { outline:none; border-color:#fff; background:#111; }
-        textarea { min-height:120px; resize:vertical; line-height:1.5; }
-        select { cursor:pointer; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23e5e5e5' d='M6 9L1 4h10z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; padding-right:40px; }
-        .color-field { display:flex; align-items:center; gap:12px; }
-        .color-preview { width:40px; height:40px; border-radius:6px; border:2px solid #333; transition: all 0.2s ease; }
-        .form-actions { display:flex; gap:12px; margin-top:8px; }
-        .btn { padding:12px 24px; border-radius:6px; text-decoration:none; font-size:14px; font-weight:500; transition: all 0.2s ease; border:1px solid transparent; cursor:pointer; display:inline-block; text-align:center; }
-        .btn-primary { background:#fff; color:#0a0a0a; border-color:#fff; flex:1; }
-        .btn-primary:hover { background:#e5e5e5; border-color:#e5e5e5; transform:translateY(-1px); }
-        .btn-secondary { background:transparent; color:#e5e5e5; border-color:#333; }
-        .btn-secondary:hover { border-color:#555; background:#1a1a1a; }
-        .form-group { display:flex; flex-direction:column; }
-        @media (max-width:768px) { .habit-page { padding:24px; } h2 { font-size:24px; } .form-actions { flex-direction:column; } .btn { width:100%; } }
+        :root {
+            --bg-body: #050505;
+            --bg-card: #0f0f0f;
+            --bg-input: #18181b;
+            --border: #27272a;
+            --text-main: #ededed;
+            --text-muted: #a1a1aa;
+            --primary: #6366f1;
+            --danger: #ef4444;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            margin: 0; padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container { width: 100%; max-width: 550px; padding: 20px; }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        h2 { margin: 0 0 8px 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+        .subtitle { color: var(--text-muted); font-size: 14px; margin-bottom: 32px; display: block; }
+
+        /* Forms */
+        form { display: flex; flex-direction: column; gap: 20px; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
+
+        label {
+            font-size: 13px; font-weight: 600; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        input, textarea, select {
+            width: 100%; padding: 14px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-family: inherit; font-size: 15px;
+            transition: all 0.2s ease; outline: none;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            background: #27272a;
+        }
+
+        textarea { min-height: 100px; resize: vertical; }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        /* Tracking Section */
+        .tracking-section {
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px dashed var(--border);
+            padding: 20px; border-radius: 16px; margin-top: 10px;
+        }
+
+        /* Actions */
+        .actions { display: flex; gap: 15px; margin-top: 10px; }
+
+        .btn-primary {
+            flex: 1; background: var(--text-main); color: #000; padding: 14px;
+            border-radius: 12px; font-weight: 600; border: none; cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .btn-primary:hover { background: #fff; transform: translateY(-2px); }
+
+        .btn-secondary {
+            padding: 14px 24px; background: transparent; color: var(--text-muted);
+            text-decoration: none; font-weight: 500; border-radius: 12px;
+            border: 1px solid transparent; transition: all 0.2s; text-align: center;
+        }
+        .btn-secondary:hover { background: var(--bg-input); color: var(--text-main); }
+
+        .hidden { display: none; }
+        .not-found { text-align: center; padding: 60px; color: var(--text-muted); }
     </style>
 </head>
 <body>
-    <div class="container">
-        <% if (!habit) { %>
-            <div class="habit-page not-found">
-                <h2>Edit Habit</h2>
-                <p>Habit not found</p>
-                <a href="/" class="btn btn-secondary">Back</a>
-            </div>
-        <% } else { %>
-            <main class="habit-page">
-                <h2>Edit Habit</h2>
 
-                <% if (locals && locals.errors && locals.errors.length) { %>
-                    <ul class="errors">
-                        <% locals.errors.forEach(err => { %>
-                            <li><%= err %></li>
-                        <% }) %>
-                    </ul>
-                <% } %>
+<div class="container">
+    <% if (!habit) { %>
+        <div class="card not-found">
+            <h2>Habit Not Found</h2>
+            <p class="subtitle">The habit you are trying to edit does not exist.</p>
+            <a href="/" class="btn-primary" style="display:inline-block; width:auto;">Back to Dashboard</a>
+        </div>
+    <% } else { %>
+        <div class="card">
+            <h2>Edit Habit</h2>
+            <span class="subtitle">Update your goals and settings.</span>
 
-                <form action="/habits/<%= habit.id %>/edit" method="POST">
+            <form action="/habits/<%= habit.id %>/edit" method="POST">
+                
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" name="title" value="<%= habit.title %>" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description"><%= habit.description %></textarea>
+                </div>
+
+                <div class="form-row">
                     <div class="form-group">
-                        <label for="title">Habit Title</label>
-                        <input type="text" name="title" id="title" value="<%= habit.title %>" required placeholder="e.g., Exercise daily">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="description">Description</label>
-                        <textarea name="description" id="description" placeholder="Describe your habit and why it matters to you..."><%= habit.description %></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="category">Category</label>
-                        <select name="category" id="category" required>
-                            <% const categories = ['General','Health','Work','Learning','Fitness']; %>
+                        <label>Category</label>
+                        <select name="category">
+                            <% const categories = ['General','Health','Work','Learning','Fitness','Mindfulness']; %>
                             <% categories.forEach(c => { %>
                                 <option value="<%= c %>" <%= habit.category === c ? 'selected' : '' %>><%= c %></option>
                             <% }) %>
                         </select>
                     </div>
-
                     <div class="form-group">
-                        <label for="color">Color</label>
-                        <div class="color-field">
-                            <div class="color-preview" id="colorPreview"></div>
-                            <select name="color" id="color" required style="flex:1;">
-                                <% const colors = { '#5b4ef5':'Purple', '#ff6b6b':'Red', '#4caf50':'Green', '#ffb74d':'Orange', '#03a9f4':'Blue' }; %>
-                                <% Object.entries(colors).forEach(([val,name]) => { %>
-                                    <option value="<%= val %>" <%= habit.color === val ? 'selected' : '' %>><%= name %></option>
-                                <% }) %>
-                            </select>
+                        <label>Color Tag</label>
+                        <select name="color" id="colorSelect">
+                            <option value="#5b4ef5" <%= habit.color === '#5b4ef5' ? 'selected' : '' %>>⚡ Purple</option>
+                            <option value="#ff6b6b" <%= habit.color === '#ff6b6b' ? 'selected' : '' %>>🔥 Red</option>
+                            <option value="#4caf50" <%= habit.color === '#4caf50' ? 'selected' : '' %>>🌿 Green</option>
+                            <option value="#ffb74d" <%= habit.color === '#ffb74d' ? 'selected' : '' %>>☀️ Orange</option>
+                            <option value="#0ea5e9" <%= habit.color === '#0ea5e9' ? 'selected' : '' %>>💧 Blue</option>
+                            <option value="#ec4899" <%= habit.color === '#ec4899' ? 'selected' : '' %>>🌸 Pink</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="tracking-section">
+                    <div class="form-group">
+                        <label style="color: var(--primary);">Tracking Method</label>
+                        <select name="type" id="typeSelect" onchange="toggleTarget()">
+                            <option value="boolean" <%= habit.type === 'boolean' ? 'selected' : '' %>>✅ Checkbox (Yes/No)</option>
+                            <option value="numeric" <%= habit.type === 'numeric' ? 'selected' : '' %>>🔢 Numeric Counter (e.g. 8 cups)</option>
+                        </select>
+                    </div>
+
+                    <div id="targetWrapper" class="<%= habit.type === 'numeric' ? '' : 'hidden' %>" style="margin-top: 20px;">
+                        <div class="form-group">
+                            <label>Daily Target Goal</label>
+                            <input type="number" name="target_value" value="<%= habit.target_value || 1 %>" min="1">
+                            <small style="color: var(--text-muted); font-size: 12px; margin-top: 6px;">
+                                Update your daily target number.
+                            </small>
                         </div>
                     </div>
+                </div>
 
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
-                        <a href="/" class="btn btn-secondary">Cancel</a>
-                    </div>
-                </form>
-            </main>
-        <% } %>
-    </div>
+                <div class="actions">
+                    <a href="/" class="btn-secondary">Cancel</a>
+                    <button class="btn-primary" type="submit">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    <% } %>
+</div>
 
-    <script>
-        const colorSelect = document.getElementById('color');
-        const colorPreview = document.getElementById('colorPreview');
-        colorSelect.addEventListener('change', () => {
-            colorPreview.style.backgroundColor = colorSelect.value;
-        });
-    </script>
+<script>
+    function toggleTarget() {
+        const type = document.getElementById('typeSelect').value;
+        const wrapper = document.getElementById('targetWrapper');
+        
+        if (type === 'numeric') {
+            wrapper.classList.remove('hidden');
+            wrapper.style.animation = "fadeIn 0.3s ease-out";
+        } else {
+            wrapper.classList.add('hidden');
+        }
+    }
+</script>
+
 </body>
 </html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Rankings - HabitFlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-body: #050505;
+            --bg-card: #0f0f0f;
+            --bg-hover: #1a1a1a;
+            --border: #27272a;
+            --text-main: #ededed;
+            --text-muted: #a1a1aa;
+            
+            /* Gradients */
+            --accent-gradient: linear-gradient(135deg, #6366f1, #a855f7);
+            --gold-gradient: linear-gradient(135deg, #fbbf24, #d97706);
+            --silver-gradient: linear-gradient(135deg, #e2e8f0, #94a3b8);
+            --bronze-gradient: linear-gradient(135deg, #d97706, #92400e);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            margin: 0; padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container { max-width: 700px; margin: 0 auto; padding: 60px 20px; }
+
+        /* --- HEADER --- */
+        .header-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 42px;
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            margin: 0 0 10px 0;
+        }
+
+        .gradient-text {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .back-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .back-link:hover { color: #fff; }
+
+        /* --- LIST STYLES --- */
+        .leaderboard-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .rank-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .rank-card:hover {
+            transform: translateY(-2px) scale(1.01);
+            border-color: #52525b;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+
+        /* Highlight current user */
+        .rank-card.current-user {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.03);
+            box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Rank Numbers */
+        .rank-num {
+            font-size: 18px;
+            font-weight: 800;
+            width: 40px;
+            text-align: center;
+            color: #52525b;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Trophy Gradients */
+        .rank-1 { font-size: 24px; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .rank-2 { font-size: 22px; background: var(--silver-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .rank-3 { font-size: 22px; background: var(--bronze-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* User Details */
+        .user-info {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-left: 16px;
+        }
+
+        .avatar {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: var(--bg-hover);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+
+        .rank-card:hover .avatar { border-color: #52525b; color: #fff; }
+
+        .username-col { display: flex; flex-direction: column; }
+        
+        .username {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            display: flex; align-items: center; gap: 8px;
+        }
+        
+        .joined-date {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .you-tag {
+            font-size: 9px; font-weight: 800; letter-spacing: 0.5px;
+            background: #6366f1; color: #fff;
+            padding: 2px 6px; border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        /* Stats Pills */
+        .stats-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .stat-pill {
+            background: var(--bg-hover);
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            border: 1px solid transparent;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .stat-pill strong { color: #fff; margin-left: 4px; }
+        
+        .xp-pill {
+            background: rgba(99, 102, 241, 0.1);
+            color: #818cf8;
+            border-color: rgba(99, 102, 241, 0.2);
+        }
+
+        @media (max-width: 600px) {
+            .stats-container { flex-direction: column; gap: 4px; align-items: flex-end; }
+            .joined-date { display: none; }
+            .stat-pill { padding: 4px 10px; font-size: 11px; min-width: auto; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-section">
+        <h1>Global <span class="gradient-text">Rankings</span></h1>
+        <a href="/" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Back to Dashboard
+        </a>
+    </div>
+
+    <div class="leaderboard-list">
+        <% if (leaders.length === 0) { %>
+            <div style="text-align:center; padding: 60px; color: var(--text-muted); border: 1px dashed var(--border); border-radius: 16px;">
+                No players yet. Be the first legend!
+            </div>
+        <% } %>
+
+        <% leaders.forEach((player, index) => { %>
+            <% const rank = index + 1; %>
+            <% const isCurrentUser = (user && user.username === player.username); %>
+            
+            <div class="rank-card <%= isCurrentUser ? 'current-user' : '' %>">
+                
+                <div class="rank-num">
+                    <% if (rank === 1) { %> <span class="rank-1">#1</span> <% } 
+                       else if (rank === 2) { %> <span class="rank-2">#2</span> <% } 
+                       else if (rank === 3) { %> <span class="rank-3">#3</span> <% } 
+                       else { %> #<%= rank %> <% } %>
+                </div>
+
+                <div class="user-info">
+                    <div class="avatar">
+                        <%= player.username.charAt(0).toUpperCase() %>
+                    </div>
+                    
+                    <div class="username-col">
+                        <div class="username">
+                            <%= player.username %>
+                            <% if (isCurrentUser) { %> <span class="you-tag">YOU</span> <% } %>
+                        </div>
+                        <div class="joined-date">Joined <%= new Date(player.created_at).toLocaleDateString() %></div>
+                    </div>
+                </div>
+
+                <div class="stats-container">
+                    <div class="stat-pill">
+                        Lvl <strong><%= player.level %></strong>
+                    </div>
+                    <div class="stat-pill xp-pill">
+                        XP <strong><%= player.xp %></strong>
+                    </div>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+</div>
+
+</body>
+</html>

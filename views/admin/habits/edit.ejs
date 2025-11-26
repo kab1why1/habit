@@ -1,24 +1,221 @@
-<h2>Edit Habit</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Habit - Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #050505;
+            --bg-card: #0f0f0f;
+            --bg-input: #18181b;
+            --border: #27272a;
+            --text-main: #ededed;
+            --text-muted: #a1a1aa;
+            --primary: #6366f1;
+            --success: #10b981;
+        }
 
-<form action="/admin/habits/<%= habit.id %>/edit" method="POST">
-  <label>Title</label>
-  <input name="title" value="<%= habit.title %>" required />
+        * { box-sizing: border-box; }
 
-  <label>Description</label>
-  <textarea name="description"><%= habit.description || '' %></textarea>
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            margin: 0; padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
 
-  <label>Category</label>
-  <input name="category" value="<%= habit.category || '' %>" />
+        .container { width: 100%; max-width: 550px; padding: 20px; }
 
-  <label>Color</label>
-  <input name="color" value="<%= habit.color || '' %>" />
+        /* Card */
+        .edit-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
 
-  <label>
-    <input type="checkbox" name="completed" <%= habit.completed ? 'checked' : '' %> /> Completed
-  </label>
+        /* Header */
+        .card-header { margin-bottom: 32px; text-align: center; }
+        
+        h2 { 
+            margin: 0 0 8px 0; 
+            font-size: 24px; 
+            font-weight: 700; 
+            letter-spacing: -0.5px; 
+        }
 
-  <div style="margin-top:12px;">
-    <button class="btn" type="submit">Save</button>
-    <a href="/admin/habits" class="btn">Cancel</a>
-  </div>
-</form>
+        .sub-text { color: var(--text-muted); font-size: 14px; }
+        .id-badge { 
+            background: var(--bg-input); border: 1px solid var(--border); 
+            padding: 2px 6px; border-radius: 4px; font-size: 11px; color: var(--text-muted);
+        }
+
+        /* Form */
+        form { display: flex; flex-direction: column; gap: 20px; }
+
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
+
+        label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 15px;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        input:focus, textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            background: #27272a;
+        }
+
+        textarea { min-height: 100px; resize: vertical; }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        /* Color Input Wrapper */
+        .color-wrapper { position: relative; }
+        .color-preview {
+            width: 20px; height: 20px; border-radius: 6px;
+            position: absolute; right: 12px; top: 50%;
+            transform: translateY(-50%);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+
+        /* Custom Toggle Switch */
+        .toggle-container {
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--bg-input);
+            padding: 16px; border-radius: 12px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+        }
+
+        .toggle-switch {
+            position: relative; width: 44px; height: 24px;
+        }
+
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute; cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #3f3f46;
+            transition: .4s; border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute; content: "";
+            height: 18px; width: 18px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .4s; border-radius: 50%;
+        }
+
+        input:checked + .slider { background-color: var(--success); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        .toggle-label { font-size: 14px; font-weight: 600; color: var(--text-main); }
+
+        /* Actions */
+        .actions { display: flex; gap: 12px; margin-top: 12px; }
+
+        .btn {
+            flex: 1; padding: 12px; border-radius: 12px;
+            font-size: 14px; font-weight: 600; text-align: center;
+            cursor: pointer; text-decoration: none;
+            transition: transform 0.2s; border: none;
+        }
+
+        .btn-save { background: #ededed; color: #000; }
+        .btn-save:hover { transform: translateY(-2px); background: #fff; }
+
+        .btn-cancel { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+        .btn-cancel:hover { background: var(--bg-input); color: #fff; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="edit-card">
+        <div class="card-header">
+            <h2>Edit Habit</h2>
+            <span class="sub-text">Modifying Habit <span class="id-badge">#<%= habit.id %></span></span>
+        </div>
+
+        <form action="/admin/habits/<%= habit.id %>/edit" method="POST">
+            
+            <div class="form-group">
+                <label>Title</label>
+                <input name="title" value="<%= habit.title %>" required placeholder="e.g. Morning Run" />
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <textarea name="description" placeholder="Habit details..."><%= habit.description || '' %></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Category</label>
+                    <input name="category" value="<%= habit.category || '' %>" placeholder="e.g. Health" />
+                </div>
+                <div class="form-group">
+                    <label>Color Hex</label>
+                    <div class="color-wrapper">
+                        <input name="color" id="colorInput" value="<%= habit.color || '#5b4ef5' %>" placeholder="#5b4ef5" />
+                        <div class="color-preview" id="colorDot" style="background-color: <%= habit.color || '#5b4ef5' %>;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <label class="toggle-container">
+                <span class="toggle-label">Mark as Completed</span>
+                <div class="toggle-switch">
+                    <input type="checkbox" name="completed" <%= habit.completed ? 'checked' : '' %> />
+                    <span class="slider"></span>
+                </div>
+            </label>
+
+            <div class="actions">
+                <a href="/admin/habits" class="btn btn-cancel">Cancel</a>
+                <button class="btn btn-save" type="submit">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const colorInput = document.getElementById('colorInput');
+    const colorDot = document.getElementById('colorDot');
+
+    colorInput.addEventListener('input', (e) => {
+        colorDot.style.backgroundColor = e.target.value;
+    });
+</script>
+
+</body>
+</html>

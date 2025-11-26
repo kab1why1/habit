@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stats - <%= habit.title %></title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #e5e5e5; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .card { background: #141414; padding: 30px; border-radius: 12px; border: 1px solid #222; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn { padding: 8px 16px; background: #333; color: #fff; text-decoration: none; border-radius: 6px; font-size: 14px; }
+        h2 { margin: 0; display: flex; align-items: center; gap: 10px; }
+        .badge { font-size: 12px; background: #222; padding: 4px 8px; border-radius: 4px; color: #888; font-weight: normal; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <div class="header">
+            <h2>
+                <%= habit.title %> 
+                <span class="badge"><%= habit.category %></span>
+            </h2>
+            <a href="/" class="btn">Back to Dashboard</a>
+        </div>
+
+        <div style="height: 400px;">
+            <canvas id="habitChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    const ctx = document.getElementById('habitChart').getContext('2d');
+    
+    // Data passed from Server (EJS)
+    const labels = <%- JSON.stringify(labels) %>;
+    const dataPoints = <%- JSON.stringify(values) %>;
+    const habitColor = "<%= habit.color || '#5b4ef5' %>";
+
+    new Chart(ctx, {
+        type: 'line', 
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Daily Progress',
+                data: dataPoints,
+                borderColor: habitColor,
+                backgroundColor: habitColor + '33', // Add transparency
+                borderWidth: 3,
+                tension: 0.3,
+                fill: true,
+                pointBackgroundColor: '#0a0a0a',
+                pointBorderColor: habitColor,
+                pointBorderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#222' },
+                    ticks: { color: '#666' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#666' }
+                }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
