@@ -1,11 +1,138 @@
-<header class="admin-header" style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;">
-  <div>
-    <a href="/admin/dashboard" style="font-weight:700;color:#111;text-decoration:none;">Admin Panel</a>
-  </div>
-  <div style="display:flex;gap:8px;">
-    <a href="/" class="btn">Site</a>
-    <a href="/admin/users" class="btn">Users</a>
-    <a href="/admin/habits" class="btn">Habits</a>
-    <a href="/admin/logout" class="btn btn-secondary">Logout</a>
-  </div>
+<style>
+    :root {
+        --admin-bg: rgba(5, 5, 5, 0.85);
+        --admin-border: #27272a;
+        --text-main: #ededed;
+        --text-muted: #a1a1aa;
+        --gold: #fbbf24;
+        --danger: #ef4444;
+    }
+
+    .admin-navbar {
+        background: var(--admin-bg);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--admin-border);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        padding: 16px 0;
+        margin-bottom: 30px;
+    }
+
+    .admin-nav-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Branding */
+    .admin-brand {
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .brand-text {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-main);
+        letter-spacing: -0.5px;
+    }
+
+    .admin-tag {
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        background: rgba(251, 191, 36, 0.1);
+        color: var(--gold);
+        border: 1px solid rgba(251, 191, 36, 0.2);
+        padding: 4px 8px;
+        border-radius: 100px;
+    }
+
+    /* Navigation */
+    .admin-menu {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .nav-pill {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
+        padding: 8px 16px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+
+    .nav-pill:hover {
+        color: var(--text-main);
+        background: #1a1a1a;
+    }
+
+    /* Special Buttons */
+    .btn-site {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--text-main);
+        background: #1a1a1a;
+        border: 1px solid var(--admin-border);
+    }
+    
+    .btn-site:hover {
+        background: #27272a;
+        border-color: #3f3f46;
+    }
+
+    .btn-logout {
+        color: #f87171;
+        margin-left: 8px;
+        border: 1px solid transparent;
+    }
+
+    .btn-logout:hover {
+        background: rgba(239, 68, 68, 0.1);
+        border-color: rgba(239, 68, 68, 0.2);
+        color: var(--danger);
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 600px) {
+        .admin-nav-container { flex-direction: column; gap: 16px; }
+        .admin-menu { width: 100%; justify-content: space-between; }
+        .nav-pill { padding: 8px 12px; font-size: 12px; }
+    }
+</style>
+
+<header class="admin-navbar">
+    <div class="admin-nav-container">
+        <a href="/admin/dashboard" class="admin-brand">
+            <span class="brand-text">HabitFlow</span>
+            <span class="admin-tag">Control Panel</span>
+        </a>
+
+        <nav class="admin-menu">
+            <a href="/" class="nav-pill btn-site">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                View Site
+            </a>
+            
+            <div style="width:1px; height:20px; background:#27272a; margin:0 8px;"></div>
+
+            <a href="/admin/users" class="nav-pill">Users</a>
+            <a href="/admin/habits" class="nav-pill">Habits</a>
+            <a href="/admin/dashboard" class="nav-pill">Stats</a>
+            
+            <a href="/logout" class="nav-pill btn-logout">Log Out</a>
+        </nav>
+    </div>
 </header>

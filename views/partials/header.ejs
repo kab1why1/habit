@@ -1,213 +1,244 @@
-<!-- views/partials/header.ejs -->
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
+    /* --- HEADER VARIABLES --- */
+    :root {
+        --header-bg: rgba(5, 5, 5, 0.8); /* Matches body #050505 with transparency */
+        --header-border: #27272a;        /* Matches dashboard borders */
+        --text-main: #ededed;
+        --text-muted: #a1a1aa;
+        --accent-gradient: linear-gradient(135deg, #6366f1, #a855f7);
+        --bg-hover: #1a1a1a;
     }
 
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
-        background: #0a0a0a;
-        color: #e5e5e5;
-    }
-
+    /* --- BASE STYLES --- */
     .main-header {
-        background: #141414;
-        padding: 20px 32px;
-        border-radius: 8px;
-        border: 1px solid #222;
+        background: var(--header-bg);
+        border-bottom: 1px solid var(--header-border);
+        padding: 16px 0;
+        margin-bottom: 40px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+
+    .header-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 20px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        max-width: 1200px;
-        margin: 0 auto 20px auto;
     }
 
-    .header-left {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    .logo {
-        font-size: 24px;
-        font-weight: 600;
-        letter-spacing: -0.5px;
-    }
-
+    /* --- LOGO --- */
     .logo a {
-        color: #fff;
+        font-size: 24px;
+        font-weight: 800;
+        letter-spacing: -1px;
         text-decoration: none;
-        transition: opacity 0.2s ease;
-    }
-
-    .logo a:hover {
-        opacity: 0.8;
-    }
-
-    .subtitle {
-        font-size: 13px;
-        color: #6b6b6b;
-        font-weight: 400;
-    }
-
-    .header-right {
+        color: var(--text-main);
         display: flex;
         align-items: center;
+        gap: 8px;
     }
 
+    .logo-text-gradient {
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* --- NAVIGATION --- */
     .nav-links {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 48px; /* INCREASED SPACING HERE */
         list-style: none;
+        margin: 0; padding: 0;
     }
 
-    .welcome {
-        font-size: 14px;
-        color: #e5e5e5;
-        font-weight: 500;
-        padding: 0 12px;
-    }
-
-    .btn {
-        padding: 8px 18px;
-        border-radius: 6px;
+    .nav-link {
+        color: var(--text-muted);
         text-decoration: none;
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 500;
-        transition: all 0.2s ease;
-        display: inline-block;
-        border: 1px solid transparent;
+        transition: color 0.2s;
     }
 
-    .btn-primary {
-        background: #fff;
-        color: #0a0a0a;
+    .nav-link:hover, .nav-link.active {
+        color: var(--text-main);
     }
 
-    .btn-primary:hover {
-        background: #e5e5e5;
-        transform: translateY(-1px);
-    }
-
-    .btn-secondary {
+    /* --- USER PROFILE BADGE --- */
+    .user-badge {
+        display: flex;
+        align-items: center;
+        gap: 12px;
         background: transparent;
-        color: #e5e5e5;
-        border-color: #333;
+        padding: 4px 16px 4px 4px;
+        border-radius: 100px;
+        border: 1px solid var(--header-border);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
     }
 
-    .btn-secondary:hover {
-        border-color: #555;
-        background: #1a1a1a;
+    .user-badge:hover {
+        background: var(--bg-hover);
+        border-color: #52525b;
     }
 
-    .btn-warning {
-        background: #ffa500;
-        color: #0a0a0a;
+    .user-avatar {
+        width: 32px; height: 32px;
+        background: var(--bg-hover);
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 14px; color: var(--text-main);
+        font-weight: bold;
+        box-shadow: 0 0 0 1px var(--header-border);
     }
 
-    .btn-warning:hover {
-        background: #ff9500;
-        transform: translateY(-1px);
+    .user-meta {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.1;
     }
 
-    .menu-toggle {
+    .user-name { font-size: 13px; font-weight: 600; color: var(--text-main); }
+    .user-lvl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* --- BUTTONS --- */
+    .btn-header {
+        padding: 10px 20px;
+        border-radius: 100px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-primary { 
+        background: var(--text-main); 
+        color: #000; 
+    }
+    .btn-primary:hover { 
+        background: #fff; 
+        transform: translateY(-1px); 
+        box-shadow: 0 0 15px rgba(255,255,255,0.15);
+    }
+
+    .btn-secondary { color: var(--text-muted); }
+    .btn-secondary:hover { color: var(--text-main); }
+
+    /* --- MOBILE MENU --- */
+    .mobile-toggle {
         display: none;
         background: transparent;
-        border: 1px solid #333;
-        color: #e5e5e5;
-        padding: 8px 12px;
-        border-radius: 6px;
+        border: none;
+        color: var(--text-main);
+        font-size: 24px;
         cursor: pointer;
-        font-size: 14px;
     }
 
-    .menu-toggle:hover {
-        border-color: #555;
-        background: #1a1a1a;
+    .mobile-menu {
+        display: none;
+        position: absolute;
+        top: 100%; left: 0; right: 0;
+        background: #0f0f0f;
+        border-bottom: 1px solid var(--header-border);
+        padding: 20px;
+        flex-direction: column;
+        gap: 15px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.5);
     }
+
+    .mobile-menu.active { display: flex; }
 
     @media (max-width: 768px) {
-        .main-header {
-            flex-wrap: wrap;
-            gap: 16px;
-        }
+        .nav-links { display: none; } /* Hide desktop nav */
+        .mobile-toggle { display: block; } /* Show burger */
+        .user-badge { display: none; } /* Hide badge on mobile */
+    }
 
-        .menu-toggle {
-            display: block;
-        }
-
-        .header-right {
-            width: 100%;
-            order: 3;
-        }
-
-        .nav-links {
-            flex-direction: column;
-            width: 100%;
-            gap: 8px;
-            display: none;
-        }
-
-        .nav-links.active {
-            display: flex;
-        }
-
-        .nav-links li {
-            width: 100%;
-        }
-
-        .btn {
-            width: 100%;
-            text-align: center;
-        }
-
-        .welcome {
-            padding: 8px 12px;
-            display: block;
-            text-align: center;
-            background: #1a1a1a;
-            border-radius: 6px;
-        }
+    .logo {
+        margin-right: 50px;
     }
 </style>
 
 <header class="main-header">
-    <div class="header-left">
-        <h1 class="logo"><a href="/">HabitFlow</a></h1>
-        <p class="subtitle">Track your habits, build your future</p>
+    <div class="header-container">
+        <div class="logo">
+            <a href="/">
+                Habit<span class="logo-text-gradient">Flow</span>
+            </a>
+        </div>
+
+        <nav>
+            <ul class="nav-links">
+                <% if (user) { %>
+                    <li><a href="/" class="nav-link">Dashboard</a></li>
+                    <li><a href="/habits/manage" class="nav-link">Manage Habits</a></li>
+                    <li><a href="/leaderboard" class="nav-link">Leaderboard</a></li>
+                <% } else { %>
+                    <li><a href="#" class="nav-link">Features</a></li>
+                    <li><a href="#" class="nav-link">About</a></li>
+                <% } %>
+            </ul>
+        </nav>
+
+        <div class="header-right">
+            <% if (!user) { %>
+                <div style="display: flex; align-items: center; gap: 24px;">
+                    <a href="/login" class="nav-link">Log in</a>
+                    <a href="/register" class="btn-header btn-primary">Start Free</a>
+                </div>
+            <% } else { %>
+                <div style="display:flex; align-items:center; gap:24px;">
+                    <% if (user.role === 'admin') { %>
+                        <a href="/admin/dashboard" class="nav-link" style="color:#fbbf24;">Admin</a>
+                    <% } %>
+                    
+                    <a href="/profile" class="user-badge">
+                        <div class="user-avatar"><%= user.username.charAt(0).toUpperCase() %></div>
+                        <div class="user-meta">
+                            <span class="user-name"><%= user.username %></span>
+                            <span class="user-lvl">Lvl <%= user.level %></span>
+                        </div>
+                    </a>
+                    
+                    <a href="/logout" class="nav-link" style="font-size:13px; opacity: 0.6;">Log out</a>
+                </div>
+            <% } %>
+
+            <button class="mobile-toggle" onclick="toggleMenu()">☰</button>
+        </div>
     </div>
 
-    <button class="menu-toggle" onclick="toggleMenu(this)">Menu</button>
-
-    <div class="header-right">
-        <ul class="nav-links">
-            <% if (!user) { %>
-                <!-- Not logged in -->
-                <li><a href="/register" class="btn btn-primary">Let's Get Started</a></li>
-                <li><a href="/login" class="btn btn-secondary">Login</a></li>
-
-            <% } else { %>
-                <!-- Logged in -->
-                <li><span class="welcome">Hello, <%= user.username %>!</span></li>
-                <li><a href="/profile" class="btn btn-primary">Profile</a></li>
-                <li><a href="/habits/manage" class="btn btn-secondary">My Habits</a></li>
-
-                <% if (user.role === "admin") { %>
-                    <li><a href="/admin/dashboard" class="btn btn-warning">Admin Panel</a></li>
-                <% } %>
-
-                <li><a href="/logout" class="btn btn-secondary">Logout</a></li>
-            <% } %>
-        </ul>
+    <div class="mobile-menu" id="mobileMenu">
+        <% if (user) { %>
+            <div class="user-badge" style="display:flex; width:fit-content; background: #1a1a1a;">
+                <div class="user-avatar"><%= user.username.charAt(0).toUpperCase() %></div>
+                <div class="user-meta">
+                    <span class="user-name"><%= user.username %></span>
+                    <span class="user-lvl">Lvl <%= user.level %> • <%= user.xp %> XP</span>
+                </div>
+            </div>
+            <a href="/" class="nav-link">Dashboard</a>
+            <a href="/habits/manage" class="nav-link">My Habits</a>
+            <a href="/profile" class="nav-link">Profile Settings</a>
+            <a href="/leaderboard" class="nav-link">Leaderboard</a>
+            <hr style="border:0; border-top:1px solid var(--header-border);">
+            <a href="/logout" class="nav-link" style="color:#ef4444;">Log Out</a>
+        <% } else { %>
+            <a href="/login" class="btn-header btn-secondary" style="text-align:center; border: 1px solid #333;">Log In</a>
+            <a href="/register" class="btn-header btn-primary" style="text-align:center;">Sign Up Free</a>
+        <% } %>
     </div>
 </header>
 
 <script>
-    function toggleMenu(button) {
-        const navLinks = button.nextElementSibling.querySelector('.nav-links');
-        navLinks.classList.toggle('active');
+    function toggleMenu() {
+        const menu = document.getElementById('mobileMenu');
+        menu.classList.toggle('active');
     }
 </script>

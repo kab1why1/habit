@@ -1,25 +1,266 @@
-<h2>All Habits</h2>
-<table style="width:100%;margin-top:12px;border-collapse:collapse;">
-  <thead>
-    <tr style="text-align:left;">
-      <th>ID</th><th>Title</th><th>User ID</th><th>Category</th><th>Completed</th><th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% habits.forEach(h => { %>
-      <tr>
-        <td><%= h.id %></td>
-        <td><%= h.title %></td>
-        <td><%= h.user_id %></td>
-        <td><%= h.category || '—' %></td>
-        <td><%= h.completed ? 'Yes' : 'No' %></td>
-        <td>
-          <a href="/admin/habits/<%= h.id %>/edit" class="btn tiny-btn">Edit</a>
-          <form action="/admin/habits/<%= h.id %>/delete" method="POST" style="display:inline">
-            <button type="submit" class="btn tiny-btn delete-btn" onclick="return confirm('Delete habit?')">Delete</button>
-          </form>
-        </td>
-      </tr>
-    <% }) %>
-  </tbody>
-</table>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Habits - HabitFlow Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #050505;
+            --bg-card: #0f0f0f;
+            --bg-hover: #1a1a1a;
+            --border: #27272a;
+            --text-main: #ededed;
+            --text-muted: #a1a1aa;
+            --primary: #6366f1;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            margin: 0; padding: 0;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .header-title h2 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge-count {
+            background: var(--bg-hover);
+            color: var(--text-muted);
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 100px;
+            font-weight: 600;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+        .back-link:hover { color: var(--text-main); }
+
+        /* Table Styles */
+        .table-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        thead {
+            background: var(--bg-hover);
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            padding: 16px 24px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 16px 24px;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main);
+            vertical-align: middle;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tbody tr { transition: background 0.2s; }
+        tbody tr:hover { background: var(--bg-hover); }
+
+        /* Cell Styles */
+        .habit-cell { font-weight: 500; }
+        
+        .user-cell {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .avatar-mini {
+            width: 24px; height: 24px;
+            background: #334155;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; color: #fff;
+        }
+        .username-text { font-size: 13px; color: var(--text-muted); }
+
+        .category-tag {
+            font-size: 11px;
+            padding: 2px 8px;
+            background: var(--bg-hover);
+            border-radius: 6px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid var(--border);
+        }
+
+        /* Status Badges */
+        .status-badge {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 100px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .status-done {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        
+        .status-pending {
+            background: var(--bg-hover);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+
+        /* Actions */
+        .actions-cell { display: flex; gap: 8px; }
+        
+        .btn-icon {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        
+        .btn-icon:hover {
+            background: var(--bg-hover);
+            color: #fff;
+            border-color: #52525b;
+        }
+
+        .btn-delete:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="/admin/dashboard" class="back-link">← Back to Dashboard</a>
+
+    <div class="page-header">
+        <div class="header-title">
+            <h2>
+                Global Habits
+                <span class="badge-count"><%= habits.length %></span>
+            </h2>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 60px;">ID</th>
+                    <th>Habit Title</th>
+                    <th>Owner</th>
+                    <th>Category</th>
+                    <th>Type</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% habits.forEach(h => { %>
+                    <tr>
+                        <td style="color: var(--text-muted); font-size:12px;">#<%= h.id %></td>
+                        
+                        <td class="habit-cell">
+                            <%= h.title %>
+                        </td>
+                        
+                        <td>
+                            <div class="user-cell">
+                                <% const displayUser = h.username || ('User ' + h.user_id) %>
+                                <div class="avatar-mini"><%= displayUser.charAt(0).toUpperCase() %></div>
+                                <span class="username-text"><%= displayUser %></span>
+                            </div>
+                        </td>
+                        
+                        <td>
+                            <span class="category-tag"><%= h.category || '—' %></span>
+                        </td>
+                        
+                        <td>
+                            <% if (h.type === 'numeric') { %>
+                                <span style="font-size:12px; color: var(--text-muted);">🔢 <%= h.target_value %> units</span>
+                            <% } else { %>
+                                <span style="font-size:12px; color: var(--text-muted);">✅ Daily</span>
+                            <% } %>
+                        </td>
+                        
+                        <td>
+                            <div class="actions-cell">
+                                <a href="/admin/habits/<%= h.id %>/edit" class="btn-icon" title="Edit">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                </a>
+                                
+                                <form action="/admin/habits/<%= h.id %>/delete" method="POST" style="margin:0;">
+                                    <button type="submit" class="btn-icon btn-delete" title="Delete" onclick="return confirm('Delete this habit?')">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>

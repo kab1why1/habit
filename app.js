@@ -3,47 +3,39 @@ const express = require('express');
 const expressLayout = require('express-ejs-layouts');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
-const { pool, testConnection } = require('./server/config/db');
+const { pool } = require('./server/config/db');
 
+// --- ROUTES ---
 const mainRoutes = require('./server/routes/main');
 const adminRoutes = require('./server/routes/admin');
+const profileRoutes = require('./server/routes/profile'); // <--- MAKE SURE THIS IS HERE (Line 11)
 const setUser = require('./server/middleware/setUser');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Static files
+app.set('view engine', 'ejs');
+app.set('layout', './layouts/main');
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Session
-app.use(
-  session({
-    store: new pgSession({ pool }),
-    secret: process.env.SESSION_SECRET || 'secret',
-    resave: false,
-    saveUninitialized: false,
-    cookie: { maxAge: 1000 * 60 * 60 * 24 },
-  })
-);
+app.use(session({
+  store: new pgSession({ pool }),
+  secret: process.env.SESSION_SECRET || 'secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 }
+}));
 
-// Middleware to pass user to templates
-app.use(setUser);
-
-// EJS
 app.use(expressLayout);
-app.set('layout', './layouts/main');
-app.set('view engine', 'ejs');
-
-// Routes
-app.use('/', mainRoutes);
 app.use(setUser);
+
+// --- MOUNT ROUTES ---
 app.use('/admin', adminRoutes);
+app.use('/profile', profileRoutes); // <--- CRITICAL: This connects the URL to the file (Line 35)
+app.use('/', mainRoutes);
 
-
-// Start server
-app.listen(PORT, async () => {
+app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  await testConnection();
 });

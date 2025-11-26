@@ -4,138 +4,114 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - HabitFlow</title>
-
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
+        :root {
+            --bg-body: #050505;
+            --bg-card: #0f0f0f;
+            --bg-input: #18181b;
+            --border: #27272a;
+            --text-main: #ededed;
+            --text-muted: #a1a1aa;
+            --primary: #6366f1;
+            --accent-gradient: linear-gradient(135deg, #6366f1, #a855f7);
+        }
+
+        /* Ensure full height for centering */
+        html, body {
+            height: 100%;
+            margin: 0; padding: 0;
             box-sizing: border-box;
         }
 
+        *, *:before, *:after { box-sizing: inherit; }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
-            background: #0a0a0a;
-            min-height: 100vh;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            /* CENTERING MAGIC Starts Here */
             display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            color: #e5e5e5;
+            align-items: center;     /* Vertical Center */
+            justify-content: center; /* Horizontal Center */
+            /* CENTERING MAGIC Ends Here */
+            background-image: radial-gradient(circle at top center, #1e1b4b 0%, #050505 60%);
+            padding: 20px; /* Prevents touching edges on small screens */
         }
 
         .auth-container {
             width: 100%;
-            max-width: 420px;
-        }
-
-        .auth-page {
-            background: #141414;
-            padding: 40px;
-            border-radius: 8px;
-            border: 1px solid #222;
+            max-width: 400px;
+            /* Margin auto helps reinforce centering in flex containers */
+            margin: auto; 
         }
 
         .logo-section {
             text-align: center;
-            margin-bottom: 32px;
+            margin-bottom: 40px;
         }
 
-        .logo-section h1 {
-            font-size: 32px;
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 8px;
+        .logo-icon { font-size: 42px; margin-bottom: 10px; display: block; }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin: 0 0 8px 0;
         }
 
-        .logo-section p {
-            font-size: 14px;
-            color: #6b6b6b;
+        .gradient-text {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p { color: var(--text-muted); font-size: 15px; margin: 0; }
+
+        /* Card */
+        .auth-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
         }
 
         h2 {
-            font-size: 24px;
+            margin: 0 0 24px 0;
+            font-size: 20px;
             font-weight: 600;
-            color: #fff;
-            margin-bottom: 24px;
             text-align: center;
-        }
-
-        /* Errors */
-        .errors {
-            background: #2a1515;
-            border: 1px solid #dc2626;
-            border-radius: 6px;
-            padding: 16px;
-            margin-bottom: 24px;
-            list-style: none;
-        }
-
-        .errors li {
-            color: #fca5a5;
-            font-size: 14px;
-            padding: 4px 0;
-        }
-
-        .errors li:before {
-            content: "⚠ ";
-            margin-right: 8px;
+            color: #fff;
         }
 
         /* Form */
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
+        form { display: flex; flex-direction: column; gap: 16px; }
 
-        input[type="text"],
-        input[type="password"] {
+        input {
             width: 100%;
             padding: 14px 16px;
-            background: #0a0a0a;
-            border: 1px solid #333;
-            border-radius: 6px;
-            color: #e5e5e5;
-            font-size: 14px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 15px;
             transition: all 0.2s ease;
+            outline: none;
         }
 
         input:focus {
-            outline: none;
-            border-color: #fff;
-            background: #111;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            background: #27272a;
         }
 
-        input::placeholder {
-            color: #555;
-        }
-
-        .btn {
-            padding: 14px 28px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            border: 1px solid transparent;
-            transition: 0.2s;
-        }
-
-        .btn-primary {
-            background: #fff;
-            color: #0a0a0a;
-            border-color: #fff;
-        }
-
-        .btn-primary:hover {
-            background: #e5e5e5;
-            transform: translateY(-1px);
-        }
-
-        /* Password Toggle */
-        .password-field {
-            position: relative;
-        }
-
+        .password-field { position: relative; }
+        
         .password-toggle {
             position: absolute;
             right: 16px;
@@ -143,98 +119,112 @@
             transform: translateY(-50%);
             background: none;
             border: none;
-            color: #6b6b6b;
+            color: var(--text-muted);
             cursor: pointer;
             font-size: 12px;
-            padding: 4px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .password-toggle:hover { color: #fff; }
+
+        .btn-primary {
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 8px;
         }
 
-        .password-toggle:hover {
-            color: #e5e5e5;
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -10px rgba(255, 255, 255, 0.3);
         }
 
         .auth-footer {
             text-align: center;
             margin-top: 24px;
             padding-top: 24px;
-            border-top: 1px solid #222;
+            border-top: 1px solid var(--border);
+            font-size: 14px;
+            color: var(--text-muted);
         }
 
         .auth-footer a {
             color: #fff;
             text-decoration: none;
+            font-weight: 500;
+            margin-left: 4px;
         }
+        .auth-footer a:hover { text-decoration: underline; }
 
-        .auth-footer a:hover {
-            opacity: 0.7;
+        .error-box {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            list-style: none;
+            margin: 0 0 20px 0;
         }
     </style>
 </head>
-
 <body>
-    <div class="auth-container">
-        
-        <div class="logo-section">
-            <h1>HabitFlow</h1>
-            <p>Track your habits, build your future</p>
-        </div>
 
-        <main class="auth-page">
-
-            <h2>Welcome Back</h2>
-
-            <% if (locals && locals.errors && locals.errors.length) { %>
-                <ul class="errors">
-                    <% locals.errors.forEach(err => { %>
-                        <li><%= err %></li>
-                    <% }); %>
-                </ul>
-            <% } %>
-
-            <form action="/login" method="POST">
-                <input 
-                    type="text" 
-                    name="username" 
-                    placeholder="Username" 
-                    required 
-                    autocomplete="username"
-                />
-
-                <div class="password-field">
-                    <input 
-                        type="password" 
-                        name="password" 
-                        id="password"
-                        placeholder="Password" 
-                        required 
-                        autocomplete="current-password"
-                    />
-                    <button type="button" class="password-toggle" onclick="togglePassword()">Show</button>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Login</button>
-            </form>
-
-            <div class="auth-footer">
-                <p>Don't have an account? <a href="/register">Register</a></p>
-            </div>
-
-        </main>
+<div class="auth-container">
+    
+    <div class="logo-section">
+        <span class="logo-icon">⚡</span>
+        <h1>Habit<span class="gradient-text">Flow</span></h1>
+        <p>Consistency creates greatness.</p>
     </div>
 
-    <script>
-        function togglePassword() {
-            const input = document.getElementById("password");
-            const btn = document.querySelector(".password-toggle");
+    <div class="auth-card">
+        <h2>Welcome Back</h2>
 
-            if (input.type === "password") {
-                input.type = "text";
-                btn.textContent = "Hide";
-            } else {
-                input.type = "password";
-                btn.textContent = "Show";
-            }
+        <% if (locals.errors && locals.errors.length) { %>
+            <ul class="error-box">
+                <% locals.errors.forEach(err => { %> <li><%= err %></li> <% }); %>
+            </ul>
+        <% } %>
+
+        <form action="/login" method="POST">
+            <div>
+                <input type="text" name="username" placeholder="Username" required autocomplete="username">
+            </div>
+
+            <div class="password-field">
+                <input type="password" name="password" id="password" placeholder="Password" required autocomplete="current-password">
+                <button type="button" class="password-toggle" onclick="togglePassword()">Show</button>
+            </div>
+
+            <button type="submit" class="btn-primary">Sign In</button>
+        </form>
+
+        <div class="auth-footer">
+            New here? <a href="/register">Create an account</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePassword() {
+        const input = document.getElementById('password');
+        const btn = document.querySelector('.password-toggle');
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.textContent = 'Hide';
+        } else {
+            input.type = 'password';
+            btn.textContent = 'Show';
         }
-    </script>
+    }
+</script>
+
 </body>
 </html>

@@ -1,17 +1,129 @@
-<footer>
-  <div class="footer-content">
-    <div class="footer-left">
-      <p class="footer-brand">HabitFlow</p>
-      <p class="footer-tagline">Building better habits, one day at a time</p>
+<style>
+    .site-footer {
+        background-color: #050505; /* Matches body bg */
+        border-top: 1px solid #27272a; /* Matches card borders */
+        padding: 60px 0 32px;
+        margin-top: 80px;
+        font-family: 'Inter', sans-serif;
+        color: #a1a1aa;
+    }
+
+    .footer-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr;
+        gap: 40px;
+    }
+
+    @media (max-width: 768px) {
+        .footer-container { grid-template-columns: 1fr; gap: 30px; }
+    }
+
+    /* Brand Column */
+    .footer-brand h3 {
+        color: #ededed;
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .footer-tagline {
+        font-size: 14px;
+        line-height: 1.6;
+        max-width: 300px;
+        color: #71717a;
+    }
+
+    /* Links Columns */
+    .footer-col h4 {
+        color: #ededed;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .footer-links {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .footer-links a {
+        color: #a1a1aa;
+        text-decoration: none;
+        font-size: 14px;
+        transition: color 0.2s, transform 0.2s;
+        display: inline-block;
+    }
+
+    .footer-links a:hover {
+        color: #fbbf24; /* Matches accent colors */
+        transform: translateX(4px);
+    }
+
+    /* Bottom Bar */
+    .footer-bottom {
+        margin-top: 60px;
+        padding-top: 24px;
+        border-top: 1px solid #1a1a1a;
+        text-align: center;
+        font-size: 12px;
+        color: #52525b;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 900px;
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    @media (max-width: 600px) {
+        .footer-bottom { flex-direction: column; gap: 10px; }
+    }
+</style>
+
+<footer class="site-footer">
+    <div class="footer-container">
+        <div class="footer-brand">
+            <h3>HabitFlow</h3>
+            <p class="footer-tagline">
+                Master your daily routine with data-driven insights and gamified progress tracking.
+            </p>
+        </div>
+
+        <div class="footer-col">
+            <h4>Product</h4>
+            <ul class="footer-links">
+                <li><a href="/">Dashboard</a></li>
+                <li><a href="/leaderboard">Leaderboard</a></li>
+                <li><a href="/habits/new">New Habit</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-col">
+            <h4>Company</h4>
+            <ul class="footer-links">
+                <li><a href="#">About Us</a></li>
+                <li><a href="#">Privacy Policy</a></li>
+                <li><a href="#">Terms of Service</a></li>
+            </ul>
+        </div>
     </div>
-    <div class="footer-links">
-      <a href="#">About</a>
-      <a href="#">Features</a>
-      <a href="#">Privacy</a>
-      <a href="#">Support</a>
+
+    <div class="footer-bottom">
+        <p>&copy; 2025 HabitFlow. Open Source Project.</p>
+        <p>Built with Node.js & Postgres</p>
     </div>
-  </div>
-  <div class="footer-bottom">
-    <p>© 2025 HabitFlow. All rights reserved.</p>
-  </div>
 </footer>

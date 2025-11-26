@@ -3,426 +3,392 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HabitFlow - Dashboard</title>
-    <link rel="stylesheet" href="/styles.css">
+    <title>HabitFlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg-body: #050505;
+            --bg-card: #0f0f0f;
+            --bg-hover: #1a1a1a;
+            --border: #27272a;
+            --text-main: #ededed;
+            --text-muted: #a1a1aa;
+            --primary-glow: rgba(99, 102, 241, 0.15);
+            --accent-gradient: linear-gradient(135deg, #6366f1, #a855f7);
         }
+
+        * { box-sizing: border-box; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
-            background: #0a0a0a;
-            min-height: 100vh;
-            padding: 20px;
-            color: #e5e5e5;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* --- UTILITIES --- */
+        .smooth-trans { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        .gradient-text {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
         }
 
-        main {
-            margin-top: 20px;
-        }
-
-        /* Stats Grid */
-        .stats-grid {
+        /* --- GRID LAYOUT --- */
+        .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 20px;
+            grid-template-columns: 1fr 320px;
+            gap: 24px;
+            margin-bottom: 40px;
         }
 
-        .card {
-            background: #141414;
+        @media (max-width: 850px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+        }
+
+        /* --- CARDS --- */
+        .panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px; /* Super rounded */
             padding: 24px;
-            border-radius: 8px;
-            border: 1px solid #222;
-            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-        .card:hover {
-            border-color: #333;
-            transform: translateY(-2px);
+        /* Profile Card Styling */
+        .user-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+        
+        .avatar {
+            width: 56px; height: 56px;
+            background: var(--bg-hover);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+            border: 2px solid var(--bg-body);
+            box-shadow: 0 0 0 2px var(--border);
         }
 
-        .card h3 {
-            font-size: 12px;
-            color: #6b6b6b;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 12px;
+        .xp-container { margin-top: 20px; }
+        .xp-bar-bg {
+            height: 6px; background: #27272a; border-radius: 10px; overflow: hidden;
+        }
+        .xp-bar-fill {
+            height: 100%;
+            background: var(--accent-gradient);
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+            border-radius: 10px;
         }
 
-        .card .value {
-            font-size: 32px;
-            font-weight: 600;
-            color: #fff;
-            letter-spacing: -1px;
-        }
-
-        /* Week Section */
-        .week {
-            background: #141414;
-            padding: 24px;
-            border-radius: 8px;
-            border: 1px solid #222;
-            margin-bottom: 20px;
-        }
-
-        .week h2 {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #fff;
-            letter-spacing: -0.3px;
-        }
-
-        .week-days {
+        /* Heatmap Styling */
+        .heatmap-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
+        .heatmap-grid {
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(12px, 1fr));
+            gap: 4px;
         }
-
-        .day {
-            background: #0a0a0a;
-            border-radius: 6px;
-            padding: 16px 12px;
-            text-align: center;
-            transition: all 0.2s ease;
-            border: 1px solid #222;
+        .day-box {
+            aspect-ratio: 1;
+            border-radius: 4px;
+            background: #1e1e22;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .day-box:hover { 
+            transform: scale(1.4); 
+            z-index: 10; 
+            box-shadow: 0 0 10px rgba(255,255,255,0.2);
             cursor: pointer;
         }
 
-        .day:hover {
-            border-color: #333;
-            transform: translateY(-1px);
+        /* --- HABIT LIST --- */
+        .section-title {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 16px;
         }
-
-        .day.active {
-            background: #fff;
-            color: #0a0a0a;
-            border-color: #fff;
-        }
-
-        .day strong {
-            display: block;
-            font-size: 12px;
-            font-weight: 500;
-            margin-bottom: 6px;
-            color: #6b6b6b;
-        }
-
-        .day.active strong {
-            color: #0a0a0a;
-        }
-
-        .day .date {
-            display: block;
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: #fff;
-        }
-
-        .day.active .date {
-            color: #0a0a0a;
-        }
-
-        .day .small {
-            font-size: 11px;
-            color: #6b6b6b;
-            font-weight: 400;
-        }
-
-        .day.active .small {
-            color: #555;
-        }
-
-        /* Today Habits Section */
-        .today-habits {
-            background: #141414;
-            padding: 28px;
-            border-radius: 8px;
-            border: 1px solid #222;
-        }
-
-        .today-habits h3 {
-            font-size: 18px;
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 8px;
-            letter-spacing: -0.3px;
-            text-align: center;
-        }
-
-        .today-habits h3 a {
-            color: #fff;
-            text-decoration: underline;
-        }
-
-        .today-habits h3 a:hover {
-            opacity: 0.8;
-        }
-
-        .today-habits p {
-            color: #6b6b6b;
-            font-size: 14px;
-            margin-bottom: 28px;
-            text-align: center;
-        }
-
-        .empty-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-            opacity: 0.8;
-            text-align: center;
-        }
-
-        .create-btn {
-            display: block;
-            margin: 0 auto;
-            padding: 12px 28px;
-            background: #fff;
-            color: #0a0a0a;
+        .section-title h3 { font-size: 18px; font-weight: 600; margin: 0; }
+        
+        .btn-new {
+            background: var(--text-main);
+            color: var(--bg-body);
             text-decoration: none;
-            font-weight: 500;
-            border-radius: 6px;
-            transition: all 0.2s ease;
-            font-size: 14px;
-            width: fit-content;
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: transform 0.2s;
         }
-
-        .create-btn:hover {
-            background: #e5e5e5;
-            transform: translateY(-1px);
-        }
-
-        /* Habit List */
-        .habit-list {
-            display: grid;
-            gap: 16px;
-        }
+        .btn-new:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255,255,255,0.2); }
 
         .habit-card {
-            position: relative;
-            padding: 20px;
-            border-left-width: 4px !important;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .habit-card h4 {
-            font-size: 16px;
-            font-weight: 600;
-            color: #fff;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px 24px;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: space-between;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
         }
 
-        .habit-card h4 a {
-            color: #fff;
-            text-decoration: none;
-            transition: opacity 0.2s ease;
+        .habit-card:hover {
+            border-color: #52525b;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
         }
 
-        .habit-card h4 a:hover {
-            opacity: 0.7;
+        .habit-content { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+        
+        .habit-title { 
+            font-size: 16px; font-weight: 500; color: var(--text-main); text-decoration: none;
+            display: flex; align-items: center; gap: 10px;
+        }
+        
+        .habit-tag {
+            font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+            padding: 2px 8px; border-radius: 6px; background: var(--bg-hover); color: var(--text-muted);
         }
 
-        .completed-badge {
-            background: #22c55e;
-            color: #fff;
+        /* Streak Fire Glow */
+        .streak-flame {
             font-size: 12px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: 500;
+            color: #fbbf24;
+            text-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
+            background: rgba(251, 191, 36, 0.1);
+            padding: 4px 8px; border-radius: 100px;
+            border: 1px solid rgba(251, 191, 36, 0.2);
         }
 
-        .habit-card .small {
-            font-size: 12px;
-            color: #6b6b6b;
-            margin: 0;
-        }
+        /* Actions */
+        .habit-actions { display: flex; align-items: center; gap: 10px; }
 
-        .habit-card p {
-            font-size: 14px;
-            color: #9b9b9b;
-            line-height: 1.5;
-            margin: 0;
-        }
-
-        .habit-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-        }
-
-        .btn {
-            padding: 8px 16px;
-            border-radius: 6px;
+        .btn-action {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
             text-decoration: none;
+        }
+        .btn-action:hover { background: var(--bg-hover); color: var(--text-main); border-color: #52525b; }
+
+        /* Numeric Controls */
+        .numeric-wrapper {
+            background: #0a0a0a;
+            border-radius: 12px;
+            padding: 4px;
+            display: flex; align-items: center;
+            border: 1px solid var(--border);
+        }
+        .num-btn {
+            width: 28px; height: 28px; border: none; background: transparent;
+            color: var(--text-muted); border-radius: 8px; cursor: pointer;
+            transition: background 0.2s;
+        }
+        .num-btn:hover { background: var(--bg-hover); color: #fff; }
+        .num-display { font-size: 13px; font-weight: 600; min-width: 24px; text-align: center; }
+
+        /* Main Button */
+        .btn-main {
+            padding: 8px 20px;
+            border-radius: 10px;
             font-size: 13px;
             font-weight: 500;
-            transition: all 0.2s ease;
-            border: 1px solid #333;
-            background: transparent;
-            color: #e5e5e5;
             cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+        
+        .btn-check {
+            background: var(--bg-hover);
+            color: var(--text-muted);
+            box-shadow: inset 0 0 0 1px var(--border);
+        }
+        .btn-check:hover { background: #27272a; color: #fff; }
+
+        .btn-check.completed {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
         }
 
-        .btn:hover {
-            border-color: #555;
-            background: #1a1a1a;
+        /* Progress Line */
+        .progress-line-bg {
+            width: 100%; height: 3px; background: #27272a; border-radius: 2px; margin-top: 10px;
         }
+        .progress-line-fill { height: 100%; border-radius: 2px; transition: width 0.3s; box-shadow: 0 0 8px currentColor; }
 
-        .small-btn {
-            padding: 6px 14px;
-            font-size: 12px;
+        /* Time Travel Banner */
+        .time-travel {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #fbbf24;
+            padding: 15px; border-radius: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 30px;
         }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .week-days {
-                grid-template-columns: repeat(4, 1fr);
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .day {
-                padding: 14px 8px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .week-days {
-                grid-template-columns: repeat(3, 1fr);
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .habit-actions {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-                text-align: center;
-            }
-        }
+        .time-travel a { color: #fbbf24; font-weight: 600; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <main>
-            <% if (!user) { %>
-                <section class="today-habits" style="margin-bottom: 30px;">
-                    <div class="empty-icon">🎯</div>
-                    <h3>Welcome — please <a href="/register">register</a> or <a href="/login">login</a> to manage habits</h3>
-                </section>
-            <% } else { %>
-                <!-- Stats Grid -->
-                <section class="stats-grid">
-                    <div class="card">
-                        <h3>Total Habits</h3>
-                        <p class="value"><%= stats.totalHabits || 0 %></p>
-                    </div>
-                    <div class="card">
-                        <h3>Today's Progress</h3>
-                        <p class="value"><%= stats.todayCompleted || 0 %>/<%= stats.totalHabits || 0 %></p>
-                    </div>
-                    <div class="card">
-                        <h3>Best Streak</h3>
-                        <p class="value"><%= stats.longestStreak || 0 %> days</p>
-                    </div>
-                    <div class="card">
-                        <h3>Total Completions</h3>
-                        <p class="value"><%= stats.completedHabits || 0 %></p>
-                    </div>
-                </section>
+<div class="container">
+    <main>
+        <% if (!user) { %>
+            <div class="panel" style="text-align:center; padding: 80px 20px;">
+                <h1 style="font-size: 40px; margin-bottom: 10px; letter-spacing: -1px;">Habit<span class="gradient-text">Flow</span></h1>
+                <p style="color: var(--text-muted); margin-bottom: 40px; font-size: 18px;">Master your routine. Visualize your progress.</p>
+                <div style="display:flex; gap: 15px; justify-content: center;">
+                    <a href="/login" class="btn-new" style="background: transparent; border: 1px solid var(--border); color: #fff;">Log In</a>
+                    <a href="/register" class="btn-new">Start Free</a>
+                </div>
+            </div>
+        <% } else { %>
 
-                <!-- Week Section -->
-                <section class="week">
-                    <h2>This Week</h2>
-                    <div class="week-days" id="weekDays"></div>
-                </section>
-
-                <!-- Today's Habits -->
-                <section class="today-habits">
-                    <div class="habit-list">
-                        <% habits.forEach(habit => { %>
-                            <div class="card habit-card" style="border-left-color: '<%= habit.completed ? '#22c55e' : habit.color %>';">
-                                <h4>
-                                    <a href="/habits/<%= habit.id %>"><%= habit.title %></a>
-                                    <% if (habit.completed) { %>
-                                        <span class="completed-badge">✔</span>
-                                    <% } %>
-                                </h4>
-                                <p class="small"><strong>Category:</strong> <%= habit.category %></p>
-                                <p><%= habit.description %></p>
-                                <div class="habit-actions">
-                                    <form action="/habits/<%= habit.id %>/toggle" method="POST" style="display:inline;">
-                                        <button type="submit" class="btn small-btn"><%= habit.completed ? 'Undo' : 'Complete' %></button>
-                                    </form>
-                                    <a href="/habits/<%= habit.id %>/edit" class="btn small-btn">Edit</a>
-                                </div>
-                            </div>
-                        <% }) %>
-                        <% if (!habits.length) { %>
-                            <div class="empty-icon">🎯</div>
-                            <h3>No habits yet</h3>
-                            <a href="/habits/new" class="create-btn">+ Create Your First Habit</a>
-                        <% } %>
-                    </div>
-                </section>
+            <% if (viewDate) { %>
+                <div class="time-travel smooth-trans">
+                    <span>🕰️ <strong>Editing History:</strong> <%= viewDate %></span>
+                    <a href="/">Return to Present →</a>
+                </div>
             <% } %>
-        </main>
-    </div>
 
-    <script>
-        function generateWeekDays() {
-            const weekDays = document.getElementById('weekDays');
-            const today = new Date();
-            const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-            const currentDay = today.getDay();
-            const diff = currentDay === 0 ? -6 : 1 - currentDay;
-            const monday = new Date(today);
-            monday.setDate(today.getDate() + diff);
+            <div class="dashboard-grid">
+                <div class="panel smooth-trans">
+                    <div class="heatmap-header">
+                        <span style="font-size:14px; font-weight:600; color:var(--text-muted);">Consistency Graph</span>
+                        <span style="font-size:12px; color:var(--text-muted);">Last 60 Days</span>
+                    </div>
+                    <div class="heatmap-grid">
+                        <% last60Days.forEach(date => { %>
+                            <% 
+                                const count = history[date] || 0; 
+                                let dayColor = '#1e1e22'; // Empty
+                                if (count > 0) dayColor = '#064e3b'; // Darkest Green
+                                if (count > 2) dayColor = '#059669'; // Mid
+                                if (count > 5) dayColor = '#34d399'; // Bright
+                                let opacity = count > 0 ? 1 : 0.5;
+                            %>
+                            <a href="/history?date=<%= date %>" class="day-box" title="<%= date %>: <%= count %> habits" 
+                               style="background-color: <%= dayColor %>; opacity: <%= opacity %>"></a>
+                        <% }) %>
+                    </div>
+                </div>
 
-            for (let i = 0; i < 7; i++) {
-                const date = new Date(monday);
-                date.setDate(monday.getDate() + i);
-                const isToday = date.toDateString() === today.toDateString();
-                const dayName = dayNames[date.getDay()];
-                const dayNumber = date.getDate();
+                <div class="panel smooth-trans">
+                    <div class="user-header">
+                        <div class="avatar"><%= user.username.charAt(0).toUpperCase() %></div>
+                        <div>
+                            <div style="font-size: 18px; font-weight: 700; color: #fff;"><%= user.username %></div>
+                            <div style="font-size: 12px; color: var(--text-muted);">Level <%= user.level %> Architect</div>
+                        </div>
+                    </div>
+                    
+                    <div class="xp-container">
+                        <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted); margin-bottom:6px;">
+                            <span>XP Progress</span>
+                            <span style="color:#fff;"><%= user.xp %> <span style="color:#52525b;">/ <%= user.level * 100 %></span></span>
+                        </div>
+                        <div class="xp-bar-bg">
+                            <div class="xp-bar-fill" style="width: <%= (user.xp % 100) %>%"></div>
+                        </div>
+                    </div>
 
-                const completed = Math.floor(Math.random() * 6);
-                const total = 5;
+                    <div style="margin-top: 24px; display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <a href="/profile" class="btn-action" style="width: 100%; font-size: 12px; font-weight: 500;">Profile</a>
+                        <a href="/leaderboard" class="btn-action" style="width: 100%; font-size: 12px; font-weight: 500;">Rankings</a>
+                    </div>
+                </div>
+            </div>
 
-                const dayDiv = document.createElement('div');
-                dayDiv.className = 'day' + (isToday ? ' active' : '');
-                dayDiv.innerHTML = `
-                    <strong>${dayName}</strong>
-                    <span class="date">${dayNumber}</span>
-                    <span class="small">${completed}/${total}</span>
-                `;
-                weekDays.appendChild(dayDiv);
-            }
-        }
+            <div class="section-title">
+                <h3>Today's Focus</h3>
+                <a href="/habits/new" class="btn-new">+ New Habit</a>
+            </div>
 
-        generateWeekDays();
-    </script>
+            <div class="habit-list">
+                <% if (habits.length === 0) { %>
+                    <div style="text-align:center; padding: 60px; color: var(--text-muted); border: 1px dashed var(--border); border-radius: 16px;">
+                        No habits found. Time to build a new routine!
+                    </div>
+                <% } %>
+
+                <% habits.forEach(habit => { %>
+                    <% const cardColor = habit.color || '#6366f1'; %>
+                    <% const querySuffix = viewDate ? '?date=' + viewDate : ''; %>
+
+                    <div class="habit-card">
+                        <div class="habit-content">
+                            <div class="habit-title">
+                                <a href="/habits/<%= habit.id %>"><%= habit.title %></a>
+                                <% if (habit.streak > 0) { %>
+                                    <span class="streak-flame">🔥 <%= habit.streak %></span>
+                                <% } %>
+                            </div>
+                            
+                            <div class="habit-meta">
+                                <span class="habit-tag"><%= habit.category %></span>
+                                <% if (habit.description) { %>
+                                    <span style="opacity:0.6">• <%= habit.description.substring(0, 30) %>...</span>
+                                <% } %>
+                            </div>
+
+                            <% if (habit.type === 'numeric') { %>
+                                <% 
+                                    const current = Number(habit.current_value) || 0;
+                                    const target = Number(habit.target_value) || 1; 
+                                    const percent = Math.min((current / target) * 100, 100);
+                                %>
+                                <div class="progress-line-bg">
+                                    <div class="progress-line-fill" style="width: <%= percent %>%; background-color: <%= cardColor %>; color: <%= cardColor %>;"></div>
+                                </div>
+                            <% } %>
+                        </div>
+
+                        <div class="habit-actions">
+                            <% if (habit.type === 'numeric') { %>
+                                <div class="numeric-wrapper">
+                                    <form action="/habits/<%= habit.id %>/decrement<%= querySuffix %>" method="POST" style="margin:0;">
+                                        <button class="num-btn">-</button>
+                                    </form>
+                                    <span class="num-display"><%= habit.current_value %></span>
+                                    <form action="/habits/<%= habit.id %>/increment<%= querySuffix %>" method="POST" style="margin:0;">
+                                        <button class="num-btn">+</button>
+                                    </form>
+                                </div>
+                            <% } else { %>
+                                <form action="/habits/<%= habit.id %>/toggle<%= querySuffix %>" method="POST" style="margin:0;">
+                                    <button class="btn-main btn-check <%= habit.completed ? 'completed' : '' %>">
+                                        <%= habit.completed ? 'Complete' : 'Check' %>
+                                    </button>
+                                </form>
+                            <% } %>
+
+                            <a href="/habits/<%= habit.id %>/stats" class="btn-action" title="Stats">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+                            </a>
+                            <a href="/habits/<%= habit.id %>/edit" class="btn-action" title="Edit">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            </a>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+    </main>
+</div>
+
 </body>
 </html>
