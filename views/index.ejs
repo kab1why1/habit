@@ -1,75 +1,428 @@
-<% 
-  const habits = (locals && locals.habits) ? locals.habits : [];
-  const user = (locals && locals.user) ? locals.user : null;
-%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HabitFlow - Dashboard</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<main>
-  <section class="stats-grid">
-    <div class="card">
-      <h3>Total Habits</h3>
-      <p class="value"><%= habits.length %></p>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            padding: 20px;
+            color: #e5e5e5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        main {
+            margin-top: 20px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: #141414;
+            padding: 24px;
+            border-radius: 8px;
+            border: 1px solid #222;
+            transition: all 0.2s ease;
+        }
+
+        .card:hover {
+            border-color: #333;
+            transform: translateY(-2px);
+        }
+
+        .card h3 {
+            font-size: 12px;
+            color: #6b6b6b;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .card .value {
+            font-size: 32px;
+            font-weight: 600;
+            color: #fff;
+            letter-spacing: -1px;
+        }
+
+        /* Week Section */
+        .week {
+            background: #141414;
+            padding: 24px;
+            border-radius: 8px;
+            border: 1px solid #222;
+            margin-bottom: 20px;
+        }
+
+        .week h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #fff;
+            letter-spacing: -0.3px;
+        }
+
+        .week-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 12px;
+        }
+
+        .day {
+            background: #0a0a0a;
+            border-radius: 6px;
+            padding: 16px 12px;
+            text-align: center;
+            transition: all 0.2s ease;
+            border: 1px solid #222;
+            cursor: pointer;
+        }
+
+        .day:hover {
+            border-color: #333;
+            transform: translateY(-1px);
+        }
+
+        .day.active {
+            background: #fff;
+            color: #0a0a0a;
+            border-color: #fff;
+        }
+
+        .day strong {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #6b6b6b;
+        }
+
+        .day.active strong {
+            color: #0a0a0a;
+        }
+
+        .day .date {
+            display: block;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #fff;
+        }
+
+        .day.active .date {
+            color: #0a0a0a;
+        }
+
+        .day .small {
+            font-size: 11px;
+            color: #6b6b6b;
+            font-weight: 400;
+        }
+
+        .day.active .small {
+            color: #555;
+        }
+
+        /* Today Habits Section */
+        .today-habits {
+            background: #141414;
+            padding: 28px;
+            border-radius: 8px;
+            border: 1px solid #222;
+        }
+
+        .today-habits h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 8px;
+            letter-spacing: -0.3px;
+            text-align: center;
+        }
+
+        .today-habits h3 a {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        .today-habits h3 a:hover {
+            opacity: 0.8;
+        }
+
+        .today-habits p {
+            color: #6b6b6b;
+            font-size: 14px;
+            margin-bottom: 28px;
+            text-align: center;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.8;
+            text-align: center;
+        }
+
+        .create-btn {
+            display: block;
+            margin: 0 auto;
+            padding: 12px 28px;
+            background: #fff;
+            color: #0a0a0a;
+            text-decoration: none;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            width: fit-content;
+        }
+
+        .create-btn:hover {
+            background: #e5e5e5;
+            transform: translateY(-1px);
+        }
+
+        /* Habit List */
+        .habit-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .habit-card {
+            position: relative;
+            padding: 20px;
+            border-left-width: 4px !important;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .habit-card h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .habit-card h4 a {
+            color: #fff;
+            text-decoration: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .habit-card h4 a:hover {
+            opacity: 0.7;
+        }
+
+        .completed-badge {
+            background: #22c55e;
+            color: #fff;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .habit-card .small {
+            font-size: 12px;
+            color: #6b6b6b;
+            margin: 0;
+        }
+
+        .habit-card p {
+            font-size: 14px;
+            color: #9b9b9b;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .habit-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: 1px solid #333;
+            background: transparent;
+            color: #e5e5e5;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            border-color: #555;
+            background: #1a1a1a;
+        }
+
+        .small-btn {
+            padding: 6px 14px;
+            font-size: 12px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .week-days {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .day {
+                padding: 14px 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .week-days {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .habit-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <main>
+            <% if (!user) { %>
+                <section class="today-habits" style="margin-bottom: 30px;">
+                    <div class="empty-icon">🎯</div>
+                    <h3>Welcome — please <a href="/register">register</a> or <a href="/login">login</a> to manage habits</h3>
+                </section>
+            <% } else { %>
+                <!-- Stats Grid -->
+                <section class="stats-grid">
+                    <div class="card">
+                        <h3>Total Habits</h3>
+                        <p class="value"><%= stats.totalHabits || 0 %></p>
+                    </div>
+                    <div class="card">
+                        <h3>Today's Progress</h3>
+                        <p class="value"><%= stats.todayCompleted || 0 %>/<%= stats.totalHabits || 0 %></p>
+                    </div>
+                    <div class="card">
+                        <h3>Best Streak</h3>
+                        <p class="value"><%= stats.longestStreak || 0 %> days</p>
+                    </div>
+                    <div class="card">
+                        <h3>Total Completions</h3>
+                        <p class="value"><%= stats.completedHabits || 0 %></p>
+                    </div>
+                </section>
+
+                <!-- Week Section -->
+                <section class="week">
+                    <h2>This Week</h2>
+                    <div class="week-days" id="weekDays"></div>
+                </section>
+
+                <!-- Today's Habits -->
+                <section class="today-habits">
+                    <div class="habit-list">
+                        <% habits.forEach(habit => { %>
+                            <div class="card habit-card" style="border-left-color: '<%= habit.completed ? '#22c55e' : habit.color %>';">
+                                <h4>
+                                    <a href="/habits/<%= habit.id %>"><%= habit.title %></a>
+                                    <% if (habit.completed) { %>
+                                        <span class="completed-badge">✔</span>
+                                    <% } %>
+                                </h4>
+                                <p class="small"><strong>Category:</strong> <%= habit.category %></p>
+                                <p><%= habit.description %></p>
+                                <div class="habit-actions">
+                                    <form action="/habits/<%= habit.id %>/toggle" method="POST" style="display:inline;">
+                                        <button type="submit" class="btn small-btn"><%= habit.completed ? 'Undo' : 'Complete' %></button>
+                                    </form>
+                                    <a href="/habits/<%= habit.id %>/edit" class="btn small-btn">Edit</a>
+                                </div>
+                            </div>
+                        <% }) %>
+                        <% if (!habits.length) { %>
+                            <div class="empty-icon">🎯</div>
+                            <h3>No habits yet</h3>
+                            <a href="/habits/new" class="create-btn">+ Create Your First Habit</a>
+                        <% } %>
+                    </div>
+                </section>
+            <% } %>
+        </main>
     </div>
-    <div class="card">
-      <h3>Today's Progress</h3>
-      <p class="value">0/0</p>
-    </div>
-    <div class="card">
-      <h3>Best Streak</h3>
-      <p class="value">0 days</p>
-    </div>
-    <div class="card">
-      <h3>Total Completions</h3>
-      <p class="value">1</p>
-    </div>
-  </section>
 
-  <section class="week">
-    <h2>This Week</h2>
-    <div class="week-days">
-      <!-- Future dynamic generation -->
-    </div>
-  </section>
+    <script>
+        function generateWeekDays() {
+            const weekDays = document.getElementById('weekDays');
+            const today = new Date();
+            const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+            const currentDay = today.getDay();
+            const diff = currentDay === 0 ? -6 : 1 - currentDay;
+            const monday = new Date(today);
+            monday.setDate(today.getDate() + diff);
 
-  <section class="today-habits">
-    <% if (!user) { %>
-      <div class="empty-icon">🎯</div>
-      <h3>Welcome — please <a href="/register">register</a> or <a href="/login">login</a> to manage habits</h3>
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(monday);
+                date.setDate(monday.getDate() + i);
+                const isToday = date.toDateString() === today.toDateString();
+                const dayName = dayNames[date.getDay()];
+                const dayNumber = date.getDate();
 
-    <% } else if (habits.length === 0) { %>
-      <div class="empty-icon">🎯</div>
-      <h3>No habits yet</h3>
-      <p>Create your first habit to start your journey</p>
-      <a href="/habits/new" class="create-btn">+ Create Your First Habit</a>
+                const completed = Math.floor(Math.random() * 6);
+                const total = 5;
 
-    <% } else { %>
-      <div class="habit-list">
-        <% habits.forEach(h => { 
-             const color = h.color || '#5b4ef5';
-             const category = h.category || 'General';
-        %>
-          <div class="card habit-card" style="border-left: 6px solid" <%= color %>;">
-            <h4>
-              <a href="/habits/<%= h.id %>"><%= h.title %></a>
-              <% if (h.completed) { %>
-                <span class="completed-badge">✔</span>
-              <% } %>
-            </h4>
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'day' + (isToday ? ' active' : '');
+                dayDiv.innerHTML = `
+                    <strong>${dayName}</strong>
+                    <span class="date">${dayNumber}</span>
+                    <span class="small">${completed}/${total}</span>
+                `;
+                weekDays.appendChild(dayDiv);
+            }
+        }
 
-            <p class="small"><strong>Category:</strong> <%= category %></p>
-            <p><%= h.description ? h.description.slice(0, 200) : '' %></p>
-
-            <div class="habit-actions">
-              <form action="/habits/<%= h.id %>/toggle" method="POST" style="display:inline;">
-                <button type="submit" class="btn small-btn">
-                  <%= h.completed ? 'Undo' : 'Complete' %>
-                </button>
-              </form>
-
-              <a href="/habits/<%= h.id %>/edit" class="btn small-btn">Edit</a>
-            </div>
-          </div>
-        <% }) %>
-      </div>
-    <% } %>
-  </section>
-</main>
+        generateWeekDays();
+    </script>
+</body>
+</html>

@@ -1,43 +1,107 @@
-<main class="habit-page">
-  <h2>Edit Habit</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Habit - HabitFlow</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI','Inter',sans-serif; background:#0a0a0a; min-height:100vh; padding:20px; color:#e5e5e5; }
+        .container { max-width:700px; margin:0 auto; }
+        .habit-page { background:#141414; padding:32px; border-radius:8px; border:1px solid #222; margin-bottom:20px; }
+        h2 { font-size:28px; font-weight:600; color:#fff; margin-bottom:24px; letter-spacing:-0.5px; }
+        .errors { background:#2a1515; border:1px solid #dc2626; border-radius:6px; padding:16px; margin-bottom:24px; list-style:none; }
+        .errors li { color:#fca5a5; font-size:14px; padding:4px 0; }
+        .errors li:before { content:"⚠ "; margin-right:8px; }
+        .not-found { text-align:center; padding:40px 20px; }
+        .not-found p { color:#6b6b6b; font-size:16px; margin-bottom:20px; }
+        form { display:flex; flex-direction:column; gap:20px; }
+        label { font-size:14px; font-weight:500; color:#e5e5e5; margin-bottom:8px; display:block; }
+        input[type="text"], textarea, select { width:100%; padding:12px 16px; background:#0a0a0a; border:1px solid #333; border-radius:6px; color:#e5e5e5; font-size:14px; font-family:inherit; transition: all 0.2s ease; }
+        input[type="text"]:focus, textarea:focus, select:focus { outline:none; border-color:#fff; background:#111; }
+        textarea { min-height:120px; resize:vertical; line-height:1.5; }
+        select { cursor:pointer; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23e5e5e5' d='M6 9L1 4h10z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; padding-right:40px; }
+        .color-field { display:flex; align-items:center; gap:12px; }
+        .color-preview { width:40px; height:40px; border-radius:6px; border:2px solid #333; transition: all 0.2s ease; }
+        .form-actions { display:flex; gap:12px; margin-top:8px; }
+        .btn { padding:12px 24px; border-radius:6px; text-decoration:none; font-size:14px; font-weight:500; transition: all 0.2s ease; border:1px solid transparent; cursor:pointer; display:inline-block; text-align:center; }
+        .btn-primary { background:#fff; color:#0a0a0a; border-color:#fff; flex:1; }
+        .btn-primary:hover { background:#e5e5e5; border-color:#e5e5e5; transform:translateY(-1px); }
+        .btn-secondary { background:transparent; color:#e5e5e5; border-color:#333; }
+        .btn-secondary:hover { border-color:#555; background:#1a1a1a; }
+        .form-group { display:flex; flex-direction:column; }
+        @media (max-width:768px) { .habit-page { padding:24px; } h2 { font-size:24px; } .form-actions { flex-direction:column; } .btn { width:100%; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <% if (!habit) { %>
+            <div class="habit-page not-found">
+                <h2>Edit Habit</h2>
+                <p>Habit not found</p>
+                <a href="/" class="btn btn-secondary">Back</a>
+            </div>
+        <% } else { %>
+            <main class="habit-page">
+                <h2>Edit Habit</h2>
 
-  <% if (!habit) { %>
-    <p>Habit not found</p>
-    <a href="/" class="btn btn-secondary">Back</a>
-  <% } else { %>
-    <% if (locals && locals.errors && locals.errors.length) { %>
-      <ul class="errors">
-        <% locals.errors.forEach(err => { %>
-          <li style="color:red;"><%= err %></li>
-        <% }); %>
-      </ul>
-    <% } %>
+                <% if (locals && locals.errors && locals.errors.length) { %>
+                    <ul class="errors">
+                        <% locals.errors.forEach(err => { %>
+                            <li><%= err %></li>
+                        <% }) %>
+                    </ul>
+                <% } %>
 
-    <form action="/habits/<%= habit.id %>/edit" method="POST">
-      <label for="title">Habit Title</label>
-      <input type="text" name="title" id="title" value="<%= habit.title %>" required>
+                <form action="/habits/<%= habit.id %>/edit" method="POST">
+                    <div class="form-group">
+                        <label for="title">Habit Title</label>
+                        <input type="text" name="title" id="title" value="<%= habit.title %>" required placeholder="e.g., Exercise daily">
+                    </div>
 
-      <label for="description">Description</label>
-      <textarea name="description" id="description"><%= habit.description %></textarea>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea name="description" id="description" placeholder="Describe your habit and why it matters to you..."><%= habit.description %></textarea>
+                    </div>
 
-      <label for="category">Category</label>
-      <select name="category" id="category" required>
-        <% const categories = ['General','Health','Work','Learning','Fitness']; %>
-        <% categories.forEach(c => { %>
-          <option value="<%= c %>" <%= habit.category === c ? 'selected' : '' %>><%= c %></option>
-        <% }) %>
-      </select>
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select name="category" id="category" required>
+                            <% const categories = ['General','Health','Work','Learning','Fitness']; %>
+                            <% categories.forEach(c => { %>
+                                <option value="<%= c %>" <%= habit.category === c ? 'selected' : '' %>><%= c %></option>
+                            <% }) %>
+                        </select>
+                    </div>
 
-      <label for="color">Color</label>
-      <select name="color" id="color" required>
-        <% const colors = { '#5b4ef5':'Purple', '#ff6b6b':'Red', '#4caf50':'Green', '#ffb74d':'Orange', '#03a9f4':'Blue' }; %>
-        <% Object.entries(colors).forEach(([val,name]) => { %>
-          <option value="<%= val %>" <%= habit.color === val ? 'selected' : '' %>><%= name %></option>
-        <% }) %>
-      </select>
+                    <div class="form-group">
+                        <label for="color">Color</label>
+                        <div class="color-field">
+                            <div class="color-preview" id="colorPreview"></div>
+                            <select name="color" id="color" required style="flex:1;">
+                                <% const colors = { '#5b4ef5':'Purple', '#ff6b6b':'Red', '#4caf50':'Green', '#ffb74d':'Orange', '#03a9f4':'Blue' }; %>
+                                <% Object.entries(colors).forEach(([val,name]) => { %>
+                                    <option value="<%= val %>" <%= habit.color === val ? 'selected' : '' %>><%= name %></option>
+                                <% }) %>
+                            </select>
+                        </div>
+                    </div>
 
-      <button type="submit" class="btn btn-primary">Save Changes</button>
-      <a href="/" class="btn btn-secondary">Cancel</a>
-    </form>
-  <% } %>
-</main>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <a href="/" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </main>
+        <% } %>
+    </div>
+
+    <script>
+        const colorSelect = document.getElementById('color');
+        const colorPreview = document.getElementById('colorPreview');
+        colorSelect.addEventListener('change', () => {
+            colorPreview.style.backgroundColor = colorSelect.value;
+        });
+    </script>
+</body>
+</html>
