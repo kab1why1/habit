@@ -1,6 +1,5 @@
 const { Pool } = require('pg');
 
-// Check if we are in production (for Heroku/Render deployment later)
 const isProduction = process.env.NODE_ENV === 'production';
 
 const pool = new Pool({
@@ -15,7 +14,7 @@ const pool = new Pool({
 async function initDb() {
   try {
     const sql = `
-      -- 1. USERS TABLE (Added XP and Level)
+      -- 1. USERS
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         username VARCHAR(255) UNIQUE NOT NULL,
@@ -26,8 +25,7 @@ async function initDb() {
         created_at TIMESTAMP DEFAULT NOW()
       );
 
-      -- 2. HABITS TABLE (The "Blueprint")
-      -- We removed 'completed' because completion depends on the specific date now.
+      -- 2. HABITS
       CREATE TABLE IF NOT EXISTS habits (
         id SERIAL PRIMARY KEY,
         user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
@@ -35,49 +33,46 @@ async function initDb() {
         description TEXT,
         category VARCHAR(100) DEFAULT 'General',
         color VARCHAR(30) DEFAULT '#5b4ef5',
-        type VARCHAR(20) DEFAULT 'boolean', -- 'boolean' (yes/no) or 'numeric' (counter)
-        target_value INTEGER DEFAULT 1,     -- e.g. 1 for boolean, 10 for "10 pages"
+        type VARCHAR(20) DEFAULT 'boolean',
+        target_value INTEGER DEFAULT 1,
         created_at TIMESTAMP DEFAULT NOW()
       );
 
-      -- 3. HABIT LOGS TABLE (The "History")
-      -- Records progress for a specific habit on a specific date.
+      -- 3. HABIT LOGS
       CREATE TABLE IF NOT EXISTS habit_logs (
         id SERIAL PRIMARY KEY,
         habit_id INTEGER REFERENCES habits(id) ON DELETE CASCADE,
         log_date DATE DEFAULT CURRENT_DATE,
         current_value INTEGER DEFAULT 0,
         completed BOOLEAN DEFAULT FALSE,
-        UNIQUE(habit_id, log_date) -- Prevents duplicate entries for the same day
+        UNIQUE(habit_id, log_date)
       );
+
+      -- 4. SESSIONS
+      CREATE TABLE IF NOT EXISTS "session" (
+        "sid" varchar NOT NULL COLLATE "default",
+        "sess" json NOT NULL,
+        "expire" timestamp(6) NOT NULL
+      )
+      WITH (OIDS=FALSE);
+
+      DO $$ 
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'session_pkey') THEN
+          ALTER TABLE "session" ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid") NOT DEFERRABLE INITIALLY IMMEDIATE;
+        END IF;
+      END $$;
+
+      CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON "session" ("expire");
     `;
 
     await pool.query(sql);
-    console.log('✅ Database architecture initialized successfully');
-
+    console.log('✅ Database architecture initialized');
   } catch (err) {
-    console.error('❌ Database initialization failed:', err.message);
-    process.exit(1);
+    console.error('❌ DB Init Failed:', err.message);
   }
 }
 
-async function testConnection() {
-  try {
-    const client = await pool.connect();
-    try {
-      await client.query('SELECT NOW()');
-      console.log('Database connected:', new Date().toISOString());
-    } finally {
-      client.release();
-    }
-  } catch (err) {
-    console.error('Unable to connect to the database:', err.message || err);
-    throw err;
-  }
-
-}
-
-// Run initialization immediately
 initDb();
 
 module.exports = { pool };

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Habit - Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-body:#050505; --bg-card:#0f0f0f; --bg-input:#18181b; --border:#27272a; --text-main:#ededed; --text-muted:#a1a1aa; --primary:#6366f1; }
+        * { box-sizing:border-box; }
+        body { background:var(--bg-body); color:var(--text-main); font-family:'Inter',sans-serif; margin:0; padding:0; display:flex; justify-content:center; align-items:center; min-height:100vh; }
+        .container { width:100%; max-width:550px; padding:20px; }
+        .create-card { background:var(--bg-card); border:1px solid var(--border); border-radius:24px; padding:40px; }
+        h2 { margin:0 0 8px 0; font-size:24px; font-weight:700; letter-spacing:-0.5px; text-align:center; }
+        .sub-text { color:var(--text-muted); font-size:14px; text-align:center; display:block; margin-bottom:30px; }
+        form { display:flex; flex-direction:column; gap:20px; }
+        label { font-size:12px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; }
+        input, select { width:100%; padding:14px 16px; background:var(--bg-input); border:1px solid var(--border); border-radius:12px; color:var(--text-main); font-family:inherit; font-size:15px; outline:none; }
+        input:focus, select:focus { border-color:var(--primary); background:#27272a; }
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+        .actions { display:flex; gap:12px; margin-top:10px; }
+        .btn { flex:1; padding:12px; border-radius:12px; font-size:14px; font-weight:600; text-align:center; cursor:pointer; text-decoration:none; border:none; }
+        .btn-create { background:#ededed; color:#000; }
+        .btn-cancel { background:transparent; color:var(--text-muted); border:1px solid var(--border); }
+        .user-select { border-color:#6366f1; background:rgba(99,102,241,0.05); }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="create-card">
+        <h2>Assign New Habit</h2>
+        <span class="sub-text">Create a task for a specific user.</span>
+        <form action="/admin/habits" method="POST">
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <label style="color:#818cf8;">Assign To User</label>
+                <select name="user_id" class="user-select" required>
+                    <option value="" disabled selected>Select a User...</option>
+                    <% users.forEach(u => { %> <option value="<%= u.id %>"><%= u.username %> (ID: <%= u.id %>)</option> <% }) %>
+                </select>
+            </div>
+            <div><label>Title</label><input name="title" required placeholder="e.g. Meditate" /></div>
+            <div class="form-row">
+                <div>
+                    <label>Category</label>
+                    <select name="category">
+                        <option value="General">General</option><option value="Health">Health</option><option value="Work">Work</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Color</label>
+                    <select name="color">
+                        <option value="#5b4ef5">Purple</option><option value="#ff6b6b">Red</option><option value="#4caf50">Green</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div>
+                    <label>Type</label>
+                    <select name="type" id="typeSelect" onchange="toggleTarget()">
+                        <option value="boolean">Checkbox</option><option value="numeric">Numeric</option>
+                    </select>
+                </div>
+                <div id="targetGroup" style="display:none; flex-direction:column; gap:8px;">
+                    <label>Target</label><input type="number" name="target_value" value="1" min="1" />
+                </div>
+            </div>
+            <div class="actions">
+                <a href="/admin/habits" class="btn btn-cancel">Cancel</a>
+                <button class="btn btn-create" type="submit">Create Habit</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    function toggleTarget() {
+        const type = document.getElementById('typeSelect').value;
+        document.getElementById('targetGroup').style.display = (type === 'numeric') ? 'flex' : 'none';
+    }
+</script>
+</body>
+</html>
